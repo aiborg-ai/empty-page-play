@@ -139,8 +139,8 @@ DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'dashboards') THEN
     INSERT INTO public.dashboards (
-      id, name, description, type, status, access_level, user_id, 
-      layout, widgets, filters, settings, tags, created_at, updated_at
+      id, name, description, type, status, access_level, owner_id, 
+      layout, widgets, filters, theme, tags, created_at, updated_at
     ) VALUES 
     (
       uuid_generate_v4(),
@@ -150,10 +150,10 @@ BEGIN
       'published',
       'private',
       '550e8400-e29b-41d4-a716-446655440000',
-      'grid',
+      '{"type": "grid", "columns": 12}',
       '[]',
       '{}',
-      '{"theme": "light", "auto_refresh": false}',
+      'default',
       ARRAY['sample', 'demo', 'analytics'],
       NOW(),
       NOW()
@@ -166,11 +166,43 @@ BEGIN
       'published',
       'private',
       '550e8400-e29b-41d4-a716-446655440000',
-      'flexible',
+      '{"type": "flexible", "responsive": true}',
       '[]',
       '{}',
-      '{"theme": "light", "auto_refresh": true}',
+      'default',
       ARRAY['patents', 'analysis', 'research'],
+      NOW(),
+      NOW()
+    ),
+    (
+      uuid_generate_v4(),
+      'Research Dashboard',
+      'Academic research and analysis dashboard',
+      'custom',
+      'draft', 
+      'private',
+      '550e8400-e29b-41d4-a716-446655440001',
+      '{"type": "grid", "columns": 8}',
+      '[]',
+      '{}',
+      'default',
+      ARRAY['research', 'academic', 'analysis'],
+      NOW(),
+      NOW()
+    ),
+    (
+      uuid_generate_v4(),
+      'Commercial Analytics',
+      'Business intelligence and commercial analysis dashboard',
+      'kpi',
+      'published',
+      'team',
+      '550e8400-e29b-41d4-a716-446655440002',
+      '{"type": "grid", "columns": 10}',
+      '[]',
+      '{}',
+      'default',
+      ARRAY['business', 'commercial', 'kpi'],
       NOW(),
       NOW()
     ) ON CONFLICT (id) DO NOTHING;
@@ -178,4 +210,4 @@ BEGIN
 END $$;
 
 -- Grant necessary permissions (if using RLS)
--- The RLS policies should already handle user access based on user_id
+-- The RLS policies should already handle user access based on owner_id
