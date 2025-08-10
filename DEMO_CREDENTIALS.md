@@ -1,8 +1,8 @@
 # 🔐 Demo Credentials for Production Testing
 
-## **Pre-Verified Demo Users**
+## **✅ Pre-Verified Demo Users (No Email Verification Required!)**
 
-These users are created with email verification already completed, so you can log in immediately without needing to verify email addresses.
+The app now automatically detects if you're in production mode and shows the appropriate demo users. These users are created in **both** `auth.users` and `public.users` tables with email verification already completed.
 
 ### **Primary Demo User**
 - **Email**: `demo@innospot.com`
@@ -28,13 +28,22 @@ These users are created with email verification already completed, so you can lo
 In your Supabase dashboard, execute the SQL migration:
 ```sql
 -- Copy and paste the contents of: supabase/migrations/010_create_demo_user.sql
+-- This creates users in BOTH auth.users AND public.users tables
 ```
 
 ### **2. Test Login Process**
 1. Go to your deployed InnoSpot application
 2. Click "Sign In" 
-3. Use any of the demo credentials above
-4. **No email verification required** - you'll be logged in immediately!
+3. **The app automatically shows production demo users with enhanced UI**
+4. Click "Use" next to any demo account to auto-fill credentials
+5. Click "Sign In" - **No email verification required** - instant login!
+
+### **🚀 New Features:**
+- **Smart Mode Detection**: App automatically detects production vs demo mode
+- **Enhanced Demo UI**: Beautiful cards showing user types and descriptions  
+- **One-Click Login**: Click "Use" to auto-fill any demo account
+- **No Email Verification**: All demo users are pre-verified in production
+- **Seamless Experience**: Production users work exactly like regular Supabase auth
 
 ### **3. Test Dashboard System**
 1. After login, click **"Studio"** in sidebar
