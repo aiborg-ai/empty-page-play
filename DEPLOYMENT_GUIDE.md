@@ -61,6 +61,12 @@ This guide will deploy your InnoSpot patent intelligence app with the new CMS da
 -- Copy/paste contents of: 009_showcase_tables_safe.sql
 ```
 
+#### **2d. Demo Users for Testing (Recommended)**
+```sql
+-- RECOMMENDED: Copy/paste contents of: 010_create_demo_user.sql
+-- This creates pre-verified demo users for testing (no email verification needed)
+```
+
 ### **Step 3: Get Supabase Credentials**
 
 1. **Go to**: Project Settings → **API**
