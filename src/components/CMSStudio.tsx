@@ -3,12 +3,10 @@ import {
   Database, 
   Bot, 
   Wrench, 
-  BarChart3, 
   FileText, 
   Layout,
   Plus,
   Search,
-  Filter,
   Eye,
   Edit,
   Trash2,
@@ -18,11 +16,9 @@ import {
   Tag,
   Calendar,
   Activity,
-  Settings,
   Globe,
   Lock,
-  Shield,
-  Zap
+  Shield
 } from 'lucide-react';
 import { DashboardService } from '../lib/dashboardService';
 import type { 
@@ -30,13 +26,8 @@ import type {
   AIAgent, 
   Tool, 
   Dataset, 
-  Report, 
-  User,
-  CreateDashboardData,
-  CreateAIAgentData,
-  CreateToolData,
-  CreateDatasetData,
-  CreateReportData
+  Report,
+  CreateDashboardData
 } from '../types/cms';
 import { DemoUser } from '../lib/demoAuth';
 
@@ -117,10 +108,14 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
     }
   };
 
-  const filteredAssets = getCurrentAssets().filter(asset => 
-    asset.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    asset.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAssets = getCurrentAssets().filter(asset => {
+    const hasName = 'name' in asset && asset.name;
+    const hasDescription = 'description' in asset && asset.description;
+    return (
+      (hasName && (asset as any).name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (hasDescription && (asset as any).description.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  });
 
   const getAccessLevelIcon = (accessLevel?: string) => {
     switch (accessLevel) {
@@ -465,7 +460,7 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
               {asset.is_public && <Globe className="w-4 h-4 text-green-600" />}
             </div>
             
-            {asset.description && (
+            {'description' in asset && asset.description && (
               <p className="text-sm text-gray-600 mb-2 line-clamp-2">{asset.description}</p>
             )}
 
