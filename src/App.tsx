@@ -10,7 +10,6 @@ import UserDashboard from './components/UserDashboard';
 import AccountSettings from './components/AccountSettings';
 import PlatformTour from './components/PlatformTour';
 import PatentSearch from './components/PatentSearch';
-import Dashboard from './components/Dashboard';
 import JurisdictionDashboard from './components/JurisdictionDashboard';
 import ApplicantsDashboard from './components/ApplicantsDashboard';
 import PatentCitationsDashboard from './components/PatentCitationsDashboard';
