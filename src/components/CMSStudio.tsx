@@ -24,7 +24,7 @@ import {
   Shield,
   Zap
 } from 'lucide-react';
-import { CMSService } from '../lib/cmsService';
+import { DashboardService } from '../lib/dashboardService';
 import type { 
   Dashboard, 
   AIAgent, 
@@ -38,9 +38,10 @@ import type {
   CreateDatasetData,
   CreateReportData
 } from '../types/cms';
+import { DemoUser } from '../lib/demoAuth';
 
 interface CMSStudioProps {
-  currentUser: User;
+  currentUser: DemoUser;
   projectId?: string;
 }
 
@@ -59,7 +60,7 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   
-  const cmsService = CMSService.getInstance();
+  const dashboardService = DashboardService.getInstance();
 
   const assetTypes = [
     { id: 'dashboards', label: 'Dashboards', icon: Layout, count: dashboards.length },
@@ -78,24 +79,24 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
     try {
       switch (activeTab) {
         case 'dashboards':
-          const { data: dashboardData } = await cmsService.getDashboards(projectId);
+          const { data: dashboardData } = await dashboardService.getUserDashboards();
           setDashboards(dashboardData || []);
           break;
         case 'ai_agents':
-          const { data: agentData } = await cmsService.getAIAgents(projectId);
-          setAIAgents(agentData || []);
+          // TODO: Implement AI agents service once tables are created
+          setAIAgents([]);
           break;
         case 'tools':
-          const { data: toolData } = await cmsService.getTools(projectId);
-          setTools(toolData || []);
+          // TODO: Implement tools service once tables are created
+          setTools([]);
           break;
         case 'datasets':
-          const { data: datasetData } = await cmsService.getDatasets(projectId);
-          setDatasets(datasetData || []);
+          // TODO: Implement datasets service once tables are created
+          setDatasets([]);
           break;
         case 'reports':
-          const { data: reportData } = await cmsService.getReports(projectId);
-          setReports(reportData || []);
+          // TODO: Implement reports service once tables are created
+          setReports([]);
           break;
       }
     } catch (error) {
@@ -149,24 +150,27 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
         const assetData = {
           ...formData,
           project_id: projectId,
-          owner_id: currentUser.id,
         };
 
         switch (activeTab) {
           case 'dashboards':
-            await cmsService.createDashboard(assetData as CreateDashboardData);
+            await dashboardService.createDashboard(assetData as CreateDashboardData);
             break;
           case 'ai_agents':
-            await cmsService.createAIAgent(assetData as CreateAIAgentData);
+            // TODO: Implement AI agents creation once service is available
+            console.log('AI Agents creation not yet implemented');
             break;
           case 'tools':
-            await cmsService.createTool(assetData as CreateToolData);
+            // TODO: Implement tools creation once service is available
+            console.log('Tools creation not yet implemented');
             break;
           case 'datasets':
-            await cmsService.createDataset(assetData as CreateDatasetData);
+            // TODO: Implement datasets creation once service is available
+            console.log('Datasets creation not yet implemented');
             break;
           case 'reports':
-            await cmsService.createReport(assetData as CreateReportData);
+            // TODO: Implement reports creation once service is available
+            console.log('Reports creation not yet implemented');
             break;
         }
 
@@ -175,6 +179,7 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
         loadAssets();
       } catch (error) {
         console.error('Error creating asset:', error);
+        alert('Error creating asset: ' + error);
       } finally {
         setIsLoading(false);
       }
@@ -539,16 +544,14 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
 
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
           <div className="flex items-center gap-2 text-xs text-gray-500">
-            {asset.owner && (
-              <div className="flex items-center gap-1">
-                <div className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-600">
-                    {asset.owner.display_name?.[0] || asset.owner.email?.[0] || '?'}
-                  </span>
-                </div>
-                <span>{asset.owner.display_name || asset.owner.email}</span>
+            <div className="flex items-center gap-1">
+              <div className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-xs font-medium text-gray-600">
+                  {currentUser.firstName?.[0] || currentUser.email?.[0] || '?'}
+                </span>
               </div>
-            )}
+              <span>{currentUser.firstName} {currentUser.lastName}</span>
+            </div>
           </div>
           
           <div className="flex items-center gap-1 text-xs text-gray-500">

@@ -27,6 +27,7 @@ import AIChat from './components/AIChat';
 import AIChatSupport from './components/AIChatSupport';
 import Showcase from './components/Showcase';
 import CMSAdmin from './components/CMSAdmin';
+import CMSStudio from './components/CMSStudio';
 import SubscriptionDetails from './components/SubscriptionDetails';
 import Checkout from './components/Checkout';
 import PaymentSuccess from './components/PaymentSuccess';
@@ -272,11 +273,14 @@ function App() {
             </div>
           )}
           
-          {activeSection === 'dashboards' && (
+          {activeSection === 'dashboards' && currentUser && (
             <div className="h-full bg-gray-50 flex flex-col">
               <CurrentProjectBanner />
               <div className="flex-1 -m-6">
-                <Dashboard onNavigate={handleNavigate} />
+                <CMSStudio 
+                  currentUser={currentUser} 
+                  projectId={currentProject?.id}
+                />
               </div>
             </div>
           )}
