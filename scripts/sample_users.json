@@ -1,0 +1,46 @@
+[
+  {
+    "email": "admin@innospot.com",
+    "password": "admin123456",
+    "first_name": "Admin",
+    "last_name": "User",
+    "display_name": "InnoSpot Admin",
+    "role": "admin",
+    "account_type": "commercial",
+    "organization": "InnoSpot Inc.",
+    "bio": "Platform administrator with full system access"
+  },
+  {
+    "email": "researcher@university.edu",
+    "password": "research2024",
+    "first_name": "Dr. Jane",
+    "last_name": "Smith",
+    "display_name": "Dr. Jane Smith",
+    "role": "user",
+    "account_type": "non_commercial",
+    "organization": "University Research Lab",
+    "bio": "Patent researcher specializing in AI and machine learning technologies"
+  },
+  {
+    "email": "analyst@company.com",
+    "password": "analyst123",
+    "first_name": "John",
+    "last_name": "Doe",
+    "display_name": "John Doe",
+    "role": "editor",
+    "account_type": "commercial",
+    "organization": "TechCorp Industries",
+    "bio": "IP analyst focusing on competitive intelligence and patent landscape analysis"
+  },
+  {
+    "email": "trial@example.com",
+    "password": "trial123456",
+    "first_name": "Trial",
+    "last_name": "User",
+    "display_name": "Trial User",
+    "role": "trial",
+    "account_type": "trial",
+    "organization": "Demo Company",
+    "bio": "New user exploring the platform capabilities"
+  }
+]

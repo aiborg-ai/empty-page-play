@@ -1,0 +1,56 @@
+SIMPLE CMS DEPLOYMENT STEPS
+============================
+
+The error happened because you copied markdown formatting. Here are the clean steps:
+
+STEP 1: Open Supabase
+- Go to: https://supabase.com/dashboard/project/lkpykvqkobvldrpdktks
+- Click "SQL Editor" in the left sidebar
+- Click "New query"
+
+STEP 2: Run Migration 1
+- Open the file: CLEAN_SQL_DEPLOYMENT.sql
+- Copy ALL the SQL content (ignore the comments with dashes)
+- Paste into Supabase SQL Editor
+- Click "Run"
+- You should see "Success. No rows returned"
+
+STEP 3: Run Migration 2  
+- Click "New query" again
+- Open the file: MIGRATION_2_SECURITY.sql
+- Copy ALL the SQL content
+- Paste into Supabase SQL Editor
+- Click "Run"
+- You should see "Success. No rows returned"
+
+STEP 4: Run Migration 3
+- Click "New query" again  
+- Open the file: MIGRATION_3_SAMPLE_DATA.sql
+- Copy ALL the SQL content
+- Paste into Supabase SQL Editor
+- Click "Run"
+- You should see "Success. No rows returned"
+
+STEP 5: Verify It Worked
+- In your terminal, run: node check-cms-status.js
+- You should see "CMS Schema Deployed Successfully!"
+- You should see 8 categories listed
+
+STEP 6: Test Your App
+- Run: npm run dev
+- Go to the Showcase page
+- You should see the sample items loaded from the database
+
+IMPORTANT NOTES:
+- Copy ONLY the SQL commands, not the comment lines that start with --
+- Each migration should complete without errors
+- If you get syntax errors, make sure you're not copying markdown formatting
+- The files are clean SQL with no formatting issues
+
+FILES TO USE:
+1. CLEAN_SQL_DEPLOYMENT.sql (Creates tables)
+2. MIGRATION_2_SECURITY.sql (Sets up security)  
+3. MIGRATION_3_SAMPLE_DATA.sql (Adds sample data)
+
+After deployment, you can make yourself admin by running this in Supabase:
+UPDATE public.users SET role = 'admin' WHERE email = 'your-email@example.com';
