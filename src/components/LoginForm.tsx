@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DemoAuthService } from '../lib/demoAuth';
+import { UnifiedAuthService } from '../lib/unifiedAuth';
 import { MFAService } from '../lib/mfaService';
 import { User, Eye, EyeOff, LogIn } from 'lucide-react';
 import MFAVerification from './MFAVerification';
@@ -17,8 +17,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   const [showMFA, setShowMFA] = useState(false);
   const [tempToken, setTempToken] = useState('');
 
-  const demoCredentials = DemoAuthService.getDemoCredentials();
+  const demoCredentials = UnifiedAuthService.getDemoCredentials();
   const mfaService = MFAService.getInstance();
+  const authMode = UnifiedAuthService.getMode();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,15 +27,16 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     setIsSubmitting(true);
 
     try {
-      const result = await DemoAuthService.login(email, password);
+      const result = await UnifiedAuthService.login(email, password);
       
       if (result.success) {
-        // Check if device is trusted to skip MFA
-        if (mfaService.isDeviceTrusted()) {
-          console.log('Demo Login Success (Trusted Device):', result.user);
+        console.log(`${authMode === 'production' ? '🚀 Production' : '🔧 Demo'} Login Success:`, result.user);
+        
+        // For production mode, skip MFA for demo users, for demo mode use existing MFA logic
+        if (authMode === 'production' || mfaService.isDeviceTrusted()) {
           onSuccess?.();
         } else {
-          // Require MFA verification
+          // Require MFA verification (demo mode only)
           setTempToken('temp-auth-token-' + Date.now());
           setShowMFA(true);
         }
@@ -42,6 +44,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         setError(result.error || 'Login failed');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Login failed');
     } finally {
       setIsSubmitting(false);
@@ -92,25 +95,44 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
         {/* Demo Accounts */}
         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <h3 className="text-sm font-medium text-green-800 mb-3">Demo Accounts Available:</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium text-green-800">Demo Accounts Available</h3>
+            <span className={`px-2 py-1 text-xs rounded-full ${
+              authMode === 'production' 
+                ? 'bg-blue-100 text-blue-700' 
+                : 'bg-orange-100 text-orange-700'
+            }`}>
+              {authMode === 'production' ? '🚀 Production' : '🔧 Demo'} Mode
+            </span>
+          </div>
           <div className="space-y-2">
             {demoCredentials.map((cred, index) => (
-              <div key={index} className="flex items-center justify-between text-xs">
-                <div className="font-mono text-green-700">
-                  {cred.email}
+              <div key={index} className="flex items-center justify-between text-xs border rounded p-2 bg-white">
+                <div>
+                  <div className="font-mono text-green-700 font-medium">
+                    {cred.email}
+                  </div>
+                  <div className="text-gray-600 mt-1">
+                    {'type' in cred ? cred.type : cred.email.split('@')[0]} 
+                    {' • '}
+                    {'description' in cred ? cred.description : 'Demo user'}
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleDemoLogin(cred.email, cred.password)}
-                  className="px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-xs"
+                  className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-xs font-medium"
                 >
                   Use
                 </button>
               </div>
             ))}
           </div>
-          <p className="text-xs text-green-600 mt-2">
-            Click "Use" to auto-fill login credentials
+          <p className="text-xs text-green-600 mt-3">
+            {authMode === 'production' 
+              ? '✅ Pre-verified accounts - No email verification required!' 
+              : 'Click "Use" to auto-fill login credentials'
+            }
           </p>
         </div>
 

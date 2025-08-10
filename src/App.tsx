@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { DemoAuthService, DemoUser } from './lib/demoAuth';
+import { UnifiedAuthService, UnifiedUser } from './lib/unifiedAuth';
 import { Search, Filter, Plus, Bot, Wrench, Database, FileText, Eye, X } from 'lucide-react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -36,7 +36,7 @@ import { Project } from './types/projects';
 
 function App() {
   const [activeSection, setActiveSection] = useState('register');
-  const [currentUser, setCurrentUser] = useState<DemoUser | null>(null);
+  const [currentUser, setCurrentUser] = useState<UnifiedUser | null>(null);
   const [showTour, setShowTour] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -54,11 +54,15 @@ function App() {
 
   useEffect(() => {
     // Check if user is already logged in
-    const user = DemoAuthService.getCurrentUser();
-    if (user) {
-      setCurrentUser(user);
-      setActiveSection('showcase'); // Change to home instead of dashboard
-    }
+    const checkAuth = async () => {
+      const user = await UnifiedAuthService.getCurrentUser();
+      if (user) {
+        setCurrentUser(user);
+        setActiveSection('showcase'); // Change to home instead of dashboard
+      }
+    };
+    
+    checkAuth();
     
     // Initialize project context
     const contextService = ProjectContextService.getInstance();
@@ -71,19 +75,20 @@ function App() {
     return unsubscribe;
   }, []);
 
-  const handleRegistrationSuccess = () => {
-    const user = DemoAuthService.getCurrentUser();
+  const handleRegistrationSuccess = async () => {
+    const user = await UnifiedAuthService.getCurrentUser();
     setCurrentUser(user);
     setActiveSection('showcase');
   };
 
-  const handleLoginSuccess = () => {
-    const user = DemoAuthService.getCurrentUser();
+  const handleLoginSuccess = async () => {
+    const user = await UnifiedAuthService.getCurrentUser();
     setCurrentUser(user);
     setActiveSection('showcase');
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await UnifiedAuthService.logout();
     setCurrentUser(null);
     setActiveSection('register');
   };

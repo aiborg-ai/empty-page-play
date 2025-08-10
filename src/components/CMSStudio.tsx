@@ -29,10 +29,10 @@ import type {
   Report,
   CreateDashboardData
 } from '../types/cms';
-import { DemoUser } from '../lib/demoAuth';
+import { UnifiedAuthService, UnifiedUser } from '../lib/unifiedAuth';
 
 interface CMSStudioProps {
-  currentUser: DemoUser;
+  currentUser: UnifiedUser;
   projectId?: string;
 }
 
@@ -542,10 +542,18 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
             <div className="flex items-center gap-1">
               <div className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center">
                 <span className="text-xs font-medium text-gray-600">
-                  {currentUser.firstName?.[0] || currentUser.email?.[0] || '?'}
+                  {(() => {
+                    const normalized = UnifiedAuthService.normalizeUser(currentUser);
+                    return normalized.firstName?.[0] || normalized.email?.[0] || '?';
+                  })()}
                 </span>
               </div>
-              <span>{currentUser.firstName} {currentUser.lastName}</span>
+              <span>
+                {(() => {
+                  const normalized = UnifiedAuthService.normalizeUser(currentUser);
+                  return `${normalized.firstName} ${normalized.lastName}`;
+                })()}
+              </span>
             </div>
           </div>
           

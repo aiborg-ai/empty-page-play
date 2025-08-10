@@ -209,5 +209,62 @@ BEGIN
   END IF;
 END $$;
 
+-- Create corresponding entries in public.users table  
+-- This is required for the application to work properly
+INSERT INTO public.users (
+    id, email, first_name, last_name, display_name, role, account_type, 
+    organization, bio, preferences, subscription_status, created_at, updated_at
+) VALUES 
+(
+    '550e8400-e29b-41d4-a716-446655440000',
+    'demo@innospot.com',
+    'Demo',
+    'User', 
+    'Demo User',
+    'user',
+    'trial',
+    'InnoSpot Demo',
+    'Demo user account for testing the InnoSpot platform features and capabilities.',
+    '{"theme": "light", "notifications": true, "record_search_history": true, "use_type": "trial"}',
+    'active',
+    NOW(),
+    NOW()
+),
+(
+    '550e8400-e29b-41d4-a716-446655440001',
+    'researcher@innospot.com',
+    'Research',
+    'User',
+    'Research User', 
+    'user',
+    'non_commercial',
+    'Academic Research Lab',
+    'Academic researcher focused on patent analysis and innovation research.',
+    '{"theme": "light", "notifications": true, "record_search_history": true, "use_type": "non-commercial"}',
+    'active',
+    NOW(),
+    NOW()
+),
+(
+    '550e8400-e29b-41d4-a716-446655440002',
+    'commercial@innospot.com',
+    'Commercial',
+    'User',
+    'Commercial User',
+    'user', 
+    'commercial',
+    'Business Intelligence Corp',
+    'Commercial user for business patent intelligence and competitive analysis.',
+    '{"theme": "dark", "notifications": false, "record_search_history": false, "use_type": "commercial"}',
+    'active',
+    NOW(),
+    NOW()
+) ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    first_name = EXCLUDED.first_name,
+    last_name = EXCLUDED.last_name,
+    display_name = EXCLUDED.display_name,
+    updated_at = NOW();
+
 -- Grant necessary permissions (if using RLS)
 -- The RLS policies should already handle user access based on owner_id
