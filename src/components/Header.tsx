@@ -1,14 +1,14 @@
-import { DemoAuthService, DemoUser } from '../lib/demoAuth';
+import { InstantAuthService, InstantUser } from '../lib/instantAuth';
 
 interface HeaderProps {
-  user?: DemoUser | null;
+  user?: InstantUser | null;
   onSignOut?: () => void;
   onNavigate?: (section: string) => void;
 }
 
 export default function Header({ user, onSignOut, onNavigate }: HeaderProps) {
   const handleSignOut = () => {
-    DemoAuthService.logout();
+    InstantAuthService.logout();
     onSignOut?.();
   };
 

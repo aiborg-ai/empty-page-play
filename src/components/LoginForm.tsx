@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { UnifiedAuthService } from '../lib/unifiedAuth';
-import { MFAService } from '../lib/mfaService';
+import { InstantAuthService } from '../lib/instantAuth';
 import { User, Eye, EyeOff, LogIn } from 'lucide-react';
-import MFAVerification from './MFAVerification';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -14,12 +12,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showMFA, setShowMFA] = useState(false);
-  const [tempToken, setTempToken] = useState('');
-
-  const demoCredentials = UnifiedAuthService.getDemoCredentials();
-  const mfaService = MFAService.getInstance();
-  const authMode = UnifiedAuthService.getMode();
+  const demoCredentials = InstantAuthService.getDemoCredentials();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,25 +20,20 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     setIsSubmitting(true);
 
     try {
-      const result = await UnifiedAuthService.login(email, password);
+      console.log('🔥 ATTEMPTING INSTANT LOGIN:', email);
+      const result = await InstantAuthService.login(email, password);
       
       if (result.success) {
-        console.log(`${authMode === 'production' ? '🚀 Production' : '🔧 Demo'} Login Success:`, result.user);
-        
-        // For production mode, skip MFA for demo users, for demo mode use existing MFA logic
-        if (authMode === 'production' || mfaService.isDeviceTrusted()) {
-          onSuccess?.();
-        } else {
-          // Require MFA verification (demo mode only)
-          setTempToken('temp-auth-token-' + Date.now());
-          setShowMFA(true);
-        }
+        console.log('✅ INSTANT LOGIN SUCCESS:', result.user);
+        // Skip ALL verification for instant auth
+        onSuccess?.();
       } else {
-        setError(result.error || 'Login failed');
+        console.log('❌ INSTANT LOGIN FAILED:', result.error);
+        setError(result.error || 'Invalid credentials');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setError('Login failed');
+      console.error('🔥 LOGIN ERROR:', err);
+      setError('Login failed - please try again');
     } finally {
       setIsSubmitting(false);
     }
@@ -56,32 +44,6 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     setPassword(demoPassword);
   };
 
-  const handleMFAVerificationSuccess = (trustToken?: string) => {
-    console.log('MFA Verification Success');
-    if (trustToken) {
-      console.log('Device trusted with token:', trustToken);
-    }
-    setShowMFA(false);
-    onSuccess?.();
-  };
-
-  const handleMFACanceled = () => {
-    setShowMFA(false);
-    setError('Two-factor authentication is required to complete sign in');
-  };
-
-  // Show MFA verification if needed
-  if (showMFA) {
-    const availableMethods = mfaService.getUserSecuritySettings('current-user').mfaMethods;
-    return (
-      <MFAVerification
-        methods={availableMethods}
-        onVerificationSuccess={handleMFAVerificationSuccess}
-        onCancel={handleMFACanceled}
-        tempToken={tempToken}
-      />
-    );
-  }
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm border border-gray-200">
@@ -96,13 +58,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         {/* Demo Accounts */}
         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-green-800">Demo Accounts Available</h3>
-            <span className={`px-2 py-1 text-xs rounded-full ${
-              authMode === 'production' 
-                ? 'bg-blue-100 text-blue-700' 
-                : 'bg-orange-100 text-orange-700'
-            }`}>
-              {authMode === 'production' ? '🚀 Production' : '🔧 Demo'} Mode
+            <h3 className="text-sm font-medium text-green-800">✅ Instant Demo Accounts</h3>
+            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">
+              🔥 NO VERIFICATION NEEDED
             </span>
           </div>
           <div className="space-y-2">
@@ -113,9 +71,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                     {cred.email}
                   </div>
                   <div className="text-gray-600 mt-1">
-                    {'type' in cred ? cred.type : cred.email.split('@')[0]} 
-                    {' • '}
-                    {'description' in cred ? cred.description : 'Demo user'}
+                    {cred.type} • {cred.description}
                   </div>
                 </div>
                 <button
@@ -129,10 +85,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             ))}
           </div>
           <p className="text-xs text-green-600 mt-3">
-            {authMode === 'production' 
-              ? '✅ Pre-verified accounts - No email verification required!' 
-              : 'Click "Use" to auto-fill login credentials'
-            }
+            🚀 <strong>GUARANTEED TO WORK:</strong> These accounts bypass ALL verification requirements!
           </p>
         </div>
 

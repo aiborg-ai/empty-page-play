@@ -1,4 +1,4 @@
-import { DemoUser } from '../lib/demoAuth';
+import { InstantUser } from '../lib/instantAuth';
 import { 
   User, 
   Calendar, 
@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 interface UserDashboardProps {
-  user: DemoUser;
+  user: InstantUser;
 }
 
 export default function UserDashboard({ user }: UserDashboardProps) {
@@ -66,8 +66,8 @@ export default function UserDashboard({ user }: UserDashboardProps) {
             </div>
           </div>
           <div className="text-right">
-            <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getUserTypeColor(user.useType)}`}>
-              {getUserTypeLabel(user.useType)}
+            <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getUserTypeColor(user.accountType)}`}>
+              {getUserTypeLabel(user.accountType)}
             </span>
           </div>
         </div>
@@ -84,20 +84,20 @@ export default function UserDashboard({ user }: UserDashboardProps) {
             </div>
             <div className="flex items-center gap-3">
               <User className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700">@{user.username}</span>
+              <span className="text-sm text-gray-700">@{user.email.split('@')[0]}</span>
             </div>
             <div className="flex items-center gap-3">
               <Shield className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700">{getUserTypeLabel(user.useType)} Account</span>
+              <span className="text-sm text-gray-700">{getUserTypeLabel(user.accountType)} Account</span>
             </div>
             <div className="flex items-center gap-3">
               <Calendar className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700">Member since {user.registrationDate}</span>
+              <span className="text-sm text-gray-700">Demo User Account</span>
             </div>
             <div className="flex items-center gap-3">
               <History className="w-4 h-4 text-gray-500" />
               <span className="text-sm text-gray-700">
-                Search History: {user.recordSearchHistory ? 'Enabled' : 'Disabled'}
+                Search History: {user.accountType === 'commercial' ? 'Disabled' : 'Enabled'}
               </span>
             </div>
           </div>

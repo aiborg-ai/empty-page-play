@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UnifiedAuthService, UnifiedUser } from './lib/unifiedAuth';
+import { InstantAuthService, InstantUser } from './lib/instantAuth';
 import { Search, Filter, Plus, Bot, Wrench, Database, FileText, Eye, X } from 'lucide-react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -36,7 +36,7 @@ import { Project } from './types/projects';
 
 function App() {
   const [activeSection, setActiveSection] = useState('register');
-  const [currentUser, setCurrentUser] = useState<UnifiedUser | null>(null);
+  const [currentUser, setCurrentUser] = useState<InstantUser | null>(null);
   const [showTour, setShowTour] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -54,15 +54,11 @@ function App() {
 
   useEffect(() => {
     // Check if user is already logged in
-    const checkAuth = async () => {
-      const user = await UnifiedAuthService.getCurrentUser();
-      if (user) {
-        setCurrentUser(user);
-        setActiveSection('showcase'); // Change to home instead of dashboard
-      }
-    };
-    
-    checkAuth();
+    const user = InstantAuthService.getCurrentUser();
+    if (user) {
+      setCurrentUser(user);
+      setActiveSection('showcase');
+    }
     
     // Initialize project context
     const contextService = ProjectContextService.getInstance();
@@ -75,20 +71,20 @@ function App() {
     return unsubscribe;
   }, []);
 
-  const handleRegistrationSuccess = async () => {
-    const user = await UnifiedAuthService.getCurrentUser();
+  const handleRegistrationSuccess = () => {
+    const user = InstantAuthService.getCurrentUser();
     setCurrentUser(user);
     setActiveSection('showcase');
   };
 
-  const handleLoginSuccess = async () => {
-    const user = await UnifiedAuthService.getCurrentUser();
+  const handleLoginSuccess = () => {
+    const user = InstantAuthService.getCurrentUser();
     setCurrentUser(user);
     setActiveSection('showcase');
   };
 
-  const handleSignOut = async () => {
-    await UnifiedAuthService.logout();
+  const handleSignOut = () => {
+    InstantAuthService.logout();
     setCurrentUser(null);
     setActiveSection('register');
   };
