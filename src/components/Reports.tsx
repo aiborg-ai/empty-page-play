@@ -34,6 +34,7 @@ interface Report {
   description: string;
   type: 'user' | 'shared' | 'recommended' | 'premium';
   category: 'patent_analysis' | 'market_research' | 'competitive_intelligence' | 'trend_analysis' | 'legal_analysis';
+  assetType: 'AI Agent' | 'Tool' | 'Dashboard' | 'Report';
   thumbnail: string;
   author: string;
   createdDate: string;
@@ -224,18 +225,31 @@ const ReportCarousel = ({ title, reports, onShare, onDelete, onToggleFavorite, o
               <div className="absolute inset-0 flex items-center justify-center">
                 {getCategoryIcon(report.category)}
               </div>
-              <div className="absolute top-2 right-2 flex gap-1">
-                {report.type === 'premium' && (
-                  <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
-                    Premium
-                  </span>
-                )}
-                {report.access === 'private' && (
-                  <Lock className="w-4 h-4 text-gray-600" />
-                )}
-                {report.access === 'public' && (
-                  <Globe className="w-4 h-4 text-green-600" />
-                )}
+              <div className="absolute top-2 right-2 flex flex-col gap-1">
+                <div className="flex gap-1">
+                  {report.type === 'premium' && (
+                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                      Premium
+                    </span>
+                  )}
+                  {report.access === 'private' && (
+                    <Lock className="w-4 h-4 text-gray-600" />
+                  )}
+                  {report.access === 'public' && (
+                    <Globe className="w-4 h-4 text-green-600" />
+                  )}
+                </div>
+                <span className={`px-2 py-1 text-xs font-medium rounded-full self-end ${
+                  report.assetType === 'AI Agent' 
+                    ? 'bg-purple-100 text-purple-800' 
+                    : report.assetType === 'Tool'
+                    ? 'bg-blue-100 text-blue-800'
+                    : report.assetType === 'Dashboard'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {report.assetType}
+                </span>
               </div>
               <div className="absolute top-2 left-2 flex gap-1">
                 <button
@@ -348,14 +362,17 @@ const ReportCarousel = ({ title, reports, onShare, onDelete, onToggleFavorite, o
                 </div>
                 <div className="flex items-center gap-2">
                   {report.price ? (
-                    <span className="text-green-600 font-medium text-sm">
-                      ${report.price}
-                    </span>
+                    <div className="flex flex-col items-end">
+                      <span className="text-gray-400 font-medium text-xs line-through">
+                        ${report.price}
+                      </span>
+                      <span className="text-blue-600 font-medium text-xs">Demo Access</span>
+                    </div>
                   ) : (
                     <span className="text-blue-600 font-medium text-xs">Free</span>
                   )}
                   <button className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-                    {report.isDownloaded ? 'Open' : (report.price ? 'Buy' : 'Download')}
+                    {report.isDownloaded ? 'Open' : 'Download'}
                   </button>
                 </div>
               </div>
@@ -377,103 +394,536 @@ export default function Reports() {
     // User Reports
     {
       id: '1',
-      title: 'AI Patent Landscape Analysis 2025',
-      description: 'Comprehensive analysis of AI patents filed in 2024-2025',
+      title: 'AI Patent Landscape Analyzer',
+      description: 'Intelligent AI agent that comprehensively maps generative AI patents across machine learning, NLP, and computer vision domains',
       type: 'user',
       category: 'patent_analysis',
+      assetType: 'AI Agent',
       thumbnail: '',
       author: 'Current User',
       createdDate: '2025-08-08',
       isDownloaded: true,
       isFavorite: true,
       access: 'private',
-      tags: ['AI', 'Patents', 'Machine Learning'],
-      downloadCount: 25,
-      rating: 4.8
+      tags: ['Generative AI', 'Machine Learning', 'Patents'],
+      downloadCount: 125,
+      rating: 4.9
     },
     {
       id: '2',
-      title: 'Quantum Computing Market Report',
-      description: 'Market trends and opportunities in quantum computing',
+      title: 'Patent Citation Network Mapper',
+      description: 'AI-powered agent that analyzes and visualizes patent citation networks to reveal innovation pathways and technology evolution',
       type: 'user',
-      category: 'market_research',
+      category: 'patent_analysis',
+      assetType: 'AI Agent',
       thumbnail: '',
       author: 'Current User',
       createdDate: '2025-08-05',
       isDownloaded: true,
       isFavorite: false,
       access: 'public',
-      tags: ['Quantum', 'Computing', 'Market'],
-      downloadCount: 15,
-      rating: 4.5
-    },
-    // Shared Reports
-    {
-      id: '3',
-      title: 'Biotech Innovation Trends',
-      description: 'Latest trends in biotechnology innovation and patents',
-      type: 'shared',
-      category: 'trend_analysis',
-      thumbnail: '',
-      author: 'Dr. Jane Smith',
-      createdDate: '2025-08-03',
-      isDownloaded: false,
-      isFavorite: true,
-      access: 'public',
-      tags: ['Biotech', 'Innovation', 'Trends'],
-      downloadCount: 145,
-      rating: 4.9
-    },
-    {
-      id: '4',
-      title: 'Legal Status Analysis Framework',
-      description: 'Framework for analyzing patent legal status across jurisdictions',
-      type: 'shared',
-      category: 'legal_analysis',
-      thumbnail: '',
-      author: 'Legal Team',
-      createdDate: '2025-08-01',
-      isDownloaded: true,
-      isFavorite: false,
-      access: 'public',
-      tags: ['Legal', 'Patents', 'Framework'],
+      tags: ['Citations', 'Network Analysis', 'AI'],
       downloadCount: 89,
       rating: 4.6
     },
-    // Recommended Reports
     {
-      id: '5',
-      title: 'Global Patent Competition Intelligence',
-      description: 'Competitive intelligence report on global patent filings',
-      type: 'recommended',
-      category: 'competitive_intelligence',
+      id: '3',
+      title: 'Global Patent Database Explorer',
+      description: 'Comprehensive search tool for exploring patent databases across multiple jurisdictions with advanced filtering capabilities',
+      type: 'user',
+      category: 'patent_analysis',
+      assetType: 'Tool',
       thumbnail: '',
-      author: 'InnoSpot Analytics',
-      createdDate: '2025-07-28',
-      price: 299,
+      author: 'Current User',
+      createdDate: '2025-08-02',
+      isDownloaded: true,
+      isFavorite: true,
+      access: 'private',
+      tags: ['Database', 'Search', 'Global Patents'],
+      downloadCount: 156,
+      rating: 4.8
+    },
+    // Shared Reports
+    {
+      id: '4',
+      title: 'Technology Trend Generator',
+      description: 'AI agent that identifies emerging technology trends and generates predictive insights from patent data',
+      type: 'shared',
+      category: 'trend_analysis',
+      assetType: 'AI Agent',
+      thumbnail: '',
+      author: 'Dr. Sarah Chen',
+      createdDate: '2025-07-30',
       isDownloaded: false,
-      isFavorite: false,
-      access: 'premium',
-      tags: ['Competition', 'Global', 'Intelligence'],
+      isFavorite: true,
+      access: 'public',
+      tags: ['Trends', 'Prediction', 'AI Analysis'],
       downloadCount: 234,
       rating: 4.9
     },
     {
+      id: '5',
+      title: 'Deep Dive Innovation Analyzer',
+      description: 'Advanced analytical tool for deep-diving into innovation patterns, technology lifecycle analysis, and competitive positioning',
+      type: 'shared',
+      category: 'competitive_intelligence',
+      assetType: 'Tool',
+      thumbnail: '',
+      author: 'Global Health Research Team',
+      createdDate: '2025-07-28',
+      isDownloaded: true,
+      isFavorite: false,
+      access: 'public',
+      tags: ['Deep Analysis', 'Innovation', 'Competitive Intelligence'],
+      downloadCount: 567,
+      rating: 4.8
+    },
+    {
       id: '6',
-      title: 'Emerging Technology Patent Forecast',
-      description: 'Predictive analysis of emerging technology patent trends',
+      title: 'Agrifood Technology Patent Landscape',
+      description: 'Innovation trends in agricultural technology, precision farming, and food security solutions',
+      type: 'shared',
+      category: 'market_research',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'AgTech Innovation Lab',
+      createdDate: '2025-07-25',
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'public',
+      tags: ['Agriculture', 'Food Security', 'Precision Farming'],
+      downloadCount: 198,
+      rating: 4.7
+    },
+    {
+      id: '7',
+      title: 'Microalgae Technology Patents and Market Opportunities',
+      description: 'Patent analysis of microalgae applications in biofuels, pharmaceuticals, and sustainable materials',
+      type: 'shared',
+      category: 'competitive_intelligence',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'BioTech Research Institute',
+      createdDate: '2025-07-22',
+      isDownloaded: false,
+      isFavorite: true,
+      access: 'public',
+      tags: ['Microalgae', 'Biofuels', 'Sustainable Materials'],
+      downloadCount: 143,
+      rating: 4.5
+    },
+    // Recommended Reports
+    {
+      id: '8',
+      title: 'Occupational Health & Safety Innovation Report',
+      description: 'Patent trends in workplace safety technologies, IoT monitoring, and AI-powered risk assessment',
       type: 'recommended',
       category: 'trend_analysis',
+      assetType: 'Report',
       thumbnail: '',
-      author: 'Tech Forecasting Inc.',
-      createdDate: '2025-07-25',
+      author: 'Industrial Safety Analytics',
+      createdDate: '2025-07-20',
       price: 199,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Workplace Safety', 'IoT', 'Risk Assessment'],
+      downloadCount: 312,
+      rating: 4.8
+    },
+    {
+      id: '9',
+      title: 'E-Waste Recycling Innovation Mapping',
+      description: 'Comprehensive analysis of electronic waste recycling patents and circular economy solutions',
+      type: 'recommended',
+      category: 'patent_analysis',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'Circular Economy Research',
+      createdDate: '2025-07-18',
+      price: 149,
       isDownloaded: false,
       isFavorite: true,
       access: 'premium',
-      tags: ['Emerging Tech', 'Forecast', 'Patents'],
-      downloadCount: 167,
+      tags: ['E-Waste', 'Recycling', 'Circular Economy'],
+      downloadCount: 287,
+      rating: 4.6
+    },
+    {
+      id: '10',
+      title: 'Solar Cooling Technology Patent Trends',
+      description: 'Innovation landscape in solar-powered cooling systems and energy-efficient HVAC technologies',
+      type: 'recommended',
+      category: 'market_research',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'Clean Energy Institute',
+      createdDate: '2025-07-15',
+      price: 179,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Solar Energy', 'Cooling', 'HVAC'],
+      downloadCount: 156,
+      rating: 4.4
+    },
+    {
+      id: '11',
+      title: 'Water Treatment Patent Intelligence Report',
+      description: 'Patent analysis of advanced water purification, desalination, and wastewater treatment technologies',
+      type: 'recommended',
+      category: 'competitive_intelligence',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'Water Technology Research',
+      createdDate: '2025-07-12',
+      price: 229,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Water Treatment', 'Desalination', 'Purification'],
+      downloadCount: 234,
       rating: 4.7
+    },
+    {
+      id: '12',
+      title: 'Assistive Technologies Patent Landscape for Disabilities',
+      description: 'Innovation mapping in assistive devices, accessibility technologies, and inclusive design patents',
+      type: 'recommended',
+      category: 'patent_analysis',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'Inclusive Tech Foundation',
+      createdDate: '2025-07-10',
+      price: 159,
+      isDownloaded: false,
+      isFavorite: true,
+      access: 'premium',
+      tags: ['Assistive Tech', 'Accessibility', 'Inclusive Design'],
+      downloadCount: 198,
+      rating: 4.9
+    },
+    // Premium Reports
+    {
+      id: '13',
+      title: 'Titanium Processing Innovation Intelligence',
+      description: 'Advanced materials patent analysis focusing on titanium processing, alloys, and aerospace applications',
+      type: 'premium',
+      category: 'market_research',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'Materials Science Analytics',
+      createdDate: '2025-07-08',
+      price: 399,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Titanium', 'Advanced Materials', 'Aerospace'],
+      downloadCount: 89,
+      rating: 4.8
+    },
+    {
+      id: '14',
+      title: 'Marine Genetic Resources Patent Evolution',
+      description: 'Patent trends in marine biotechnology, blue economy innovations, and sustainable ocean resources',
+      type: 'premium',
+      category: 'legal_analysis',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'Ocean Innovation Lab',
+      createdDate: '2025-07-05',
+      price: 279,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Marine Biology', 'Blue Economy', 'Ocean Resources'],
+      downloadCount: 167,
+      rating: 4.5
+    },
+    {
+      id: '15',
+      title: 'Infectious Disease Vaccine Innovation Report',
+      description: 'Comprehensive analysis of next-generation vaccine patents for infectious disease prevention',
+      type: 'premium',
+      category: 'competitive_intelligence',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'Vaccine Research Consortium',
+      createdDate: '2025-07-02',
+      price: 449,
+      isDownloaded: false,
+      isFavorite: true,
+      access: 'premium',
+      tags: ['Vaccines', 'Infectious Disease', 'Immunology'],
+      downloadCount: 345,
+      rating: 4.9
+    },
+    {
+      id: '16',
+      title: 'Graphite Technology Patent Intelligence',
+      description: 'Innovation trends in graphite applications for energy storage, electronics, and advanced manufacturing',
+      type: 'premium',
+      category: 'trend_analysis',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'Carbon Materials Institute',
+      createdDate: '2025-06-30',
+      price: 199,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Graphite', 'Energy Storage', 'Carbon Materials'],
+      downloadCount: 123,
+      rating: 4.6
+    },
+    {
+      id: '17',
+      title: 'Pharmaceutical Compound Patent Evolution 2020-2025',
+      description: '5-year analysis of pharmaceutical patent trends, drug discovery innovations, and regulatory landscape',
+      type: 'premium',
+      category: 'patent_analysis',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'PharmaTech Analytics',
+      createdDate: '2025-06-28',
+      price: 599,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Pharmaceuticals', 'Drug Discovery', 'Regulatory'],
+      downloadCount: 278,
+      rating: 4.8
+    },
+    {
+      id: '18',
+      title: 'Global Patent Filing Strategies Intelligence',
+      description: 'Strategic analysis of international patent filing patterns, prosecution trends, and IP portfolio optimization',
+      type: 'premium',
+      category: 'legal_analysis',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'IP Strategy Consultants',
+      createdDate: '2025-06-25',
+      price: 349,
+      isDownloaded: false,
+      isFavorite: true,
+      access: 'premium',
+      tags: ['Patent Strategy', 'International Filing', 'IP Portfolio'],
+      downloadCount: 456,
+      rating: 4.9
+    },
+    {
+      id: '19',
+      title: 'Emerging Technologies Patent Forecast 2025-2030',
+      description: 'Predictive intelligence on next-generation technologies including quantum computing, brain-computer interfaces, and synthetic biology',
+      type: 'premium',
+      category: 'trend_analysis',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'Future Tech Forecasting',
+      createdDate: '2025-06-22',
+      price: 799,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Future Tech', 'Quantum Computing', 'Synthetic Biology'],
+      downloadCount: 189,
+      rating: 4.7
+    },
+    {
+      id: '20',
+      title: 'Green Technology Investment Intelligence Report',
+      description: 'Market analysis of clean technology patents, venture capital trends, and sustainability innovation landscape',
+      type: 'premium',
+      category: 'market_research',
+      assetType: 'Report',
+      thumbnail: '',
+      author: 'Green Investment Analytics',
+      createdDate: '2025-06-20',
+      price: 429,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Green Tech', 'Investment', 'Sustainability'],
+      downloadCount: 234,
+      rating: 4.8
+    },
+    // New Reports and Tools
+    {
+      id: '21',
+      title: 'Patent Portfolio Optimizer',
+      description: 'AI-powered tool that analyzes patent portfolios and provides recommendations for strategic filing and portfolio optimization',
+      type: 'recommended',
+      category: 'competitive_intelligence',
+      assetType: 'AI Agent',
+      thumbnail: '',
+      author: 'IP Strategy AI',
+      createdDate: '2025-08-10',
+      price: 299,
+      isDownloaded: false,
+      isFavorite: true,
+      access: 'premium',
+      tags: ['Portfolio', 'Strategy', 'Optimization'],
+      downloadCount: 145,
+      rating: 4.7
+    },
+    {
+      id: '22',
+      title: 'Competitive Intelligence Dashboard',
+      description: 'Real-time dashboard for tracking competitor patent activities, filing patterns, and technology focus areas',
+      type: 'recommended',
+      category: 'competitive_intelligence',
+      assetType: 'Dashboard',
+      thumbnail: '',
+      author: 'InnoSpot Analytics',
+      createdDate: '2025-08-09',
+      price: 199,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Competitive Intelligence', 'Real-time', 'Tracking'],
+      downloadCount: 89,
+      rating: 4.5
+    },
+    {
+      id: '23',
+      title: 'Innovation Landscape Mapper',
+      description: 'Advanced tool for mapping innovation ecosystems and identifying white spaces in technology domains',
+      type: 'shared',
+      category: 'market_research',
+      assetType: 'Tool',
+      thumbnail: '',
+      author: 'Tech Innovation Lab',
+      createdDate: '2025-08-07',
+      isDownloaded: false,
+      isFavorite: true,
+      access: 'public',
+      tags: ['Innovation Mapping', 'White Space', 'Ecosystem'],
+      downloadCount: 267,
+      rating: 4.8
+    },
+    {
+      id: '24',
+      title: 'Patent Valuation AI Assistant',
+      description: 'Intelligent AI agent that provides comprehensive patent valuation analysis using market data and citation metrics',
+      type: 'premium',
+      category: 'patent_analysis',
+      assetType: 'AI Agent',
+      thumbnail: '',
+      author: 'Valuation Experts AI',
+      createdDate: '2025-08-06',
+      price: 599,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Valuation', 'Market Analysis', 'AI Assistant'],
+      downloadCount: 123,
+      rating: 4.9
+    },
+    {
+      id: '25',
+      title: 'Technology Roadmap Generator',
+      description: 'AI-powered tool that creates technology roadmaps based on patent trends and innovation trajectories',
+      type: 'recommended',
+      category: 'trend_analysis',
+      assetType: 'AI Agent',
+      thumbnail: '',
+      author: 'Future Tech Systems',
+      createdDate: '2025-08-04',
+      price: 399,
+      isDownloaded: false,
+      isFavorite: true,
+      access: 'premium',
+      tags: ['Roadmap', 'Future Tech', 'Trajectories'],
+      downloadCount: 178,
+      rating: 4.6
+    },
+    {
+      id: '26',
+      title: 'Legal Status Monitoring Tool',
+      description: 'Comprehensive tool for monitoring patent legal status changes, renewals, and prosecution updates across jurisdictions',
+      type: 'shared',
+      category: 'legal_analysis',
+      assetType: 'Tool',
+      thumbnail: '',
+      author: 'Legal Tech Solutions',
+      createdDate: '2025-08-01',
+      isDownloaded: true,
+      isFavorite: false,
+      access: 'public',
+      tags: ['Legal Status', 'Monitoring', 'Prosecution'],
+      downloadCount: 345,
+      rating: 4.7
+    },
+    {
+      id: '27',
+      title: 'Patent Analytics Dashboard',
+      description: 'Interactive dashboard providing comprehensive patent analytics, trends visualization, and performance metrics',
+      type: 'user',
+      category: 'patent_analysis',
+      assetType: 'Dashboard',
+      thumbnail: '',
+      author: 'Current User',
+      createdDate: '2025-07-30',
+      isDownloaded: true,
+      isFavorite: true,
+      access: 'private',
+      tags: ['Analytics', 'Visualization', 'Metrics'],
+      downloadCount: 456,
+      rating: 4.8
+    },
+    {
+      id: '28',
+      title: 'Market Intelligence Dashboard',
+      description: 'Real-time market intelligence dashboard tracking patent filings, technology trends, and competitive landscapes',
+      type: 'shared',
+      category: 'market_research',
+      assetType: 'Dashboard',
+      thumbnail: '',
+      author: 'Market Research Pro',
+      createdDate: '2025-07-28',
+      isDownloaded: false,
+      isFavorite: true,
+      access: 'public',
+      tags: ['Market Intelligence', 'Real-time', 'Trends'],
+      downloadCount: 234,
+      rating: 4.5
+    },
+    {
+      id: '29',
+      title: 'Innovation Opportunity Finder',
+      description: 'AI agent that identifies innovation opportunities and technology gaps by analyzing patent landscapes and market needs',
+      type: 'premium',
+      category: 'competitive_intelligence',
+      assetType: 'AI Agent',
+      thumbnail: '',
+      author: 'Innovation Discovery AI',
+      createdDate: '2025-07-25',
+      price: 449,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Opportunities', 'Technology Gaps', 'Discovery'],
+      downloadCount: 167,
+      rating: 4.9
+    },
+    {
+      id: '30',
+      title: 'Patent Classification Assistant',
+      description: 'Smart tool for automated patent classification using AI-powered analysis of technical content and prior art',
+      type: 'recommended',
+      category: 'patent_analysis',
+      assetType: 'Tool',
+      thumbnail: '',
+      author: 'Classification Systems Inc',
+      createdDate: '2025-07-22',
+      price: 249,
+      isDownloaded: false,
+      isFavorite: false,
+      access: 'premium',
+      tags: ['Classification', 'Automation', 'Technical Analysis'],
+      downloadCount: 89,
+      rating: 4.4
     }
   ]);
 
