@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Home, 
   User, 
@@ -13,23 +13,48 @@ import {
   EyeOff,
   CreditCard,
   Zap,
-  CheckCircle
+  CheckCircle,
+  Settings,
+  TestTube,
+  Loader2,
+  Save,
+  Cloud
 } from 'lucide-react';
 import { PaymentDetails } from '../types/subscription';
 import SecuritySettings from './SecuritySettings';
+import { UnifiedLLMService, LLM_PROVIDERS } from '../lib/llmService';
+import { userSettingsService } from '../lib/userSettingsService';
+import type { UserSettings, SettingsSyncStatus } from '../types/userSettings';
+import { DEFAULT_USER_SETTINGS } from '../types/userSettings';
 
 interface AccountSettingsProps {
   user?: any;
+  currentUser?: any;
 }
 
-export default function AccountSettings({ user: _user }: AccountSettingsProps) {
+export default function AccountSettings({ user: _user, currentUser }: AccountSettingsProps) {
   const [selectedTab, setSelectedTab] = useState('Account Settings');
-  const [makeProfilePublic, setMakeProfilePublic] = useState(false);
-  const [recordSearchHistory, setRecordSearchHistory] = useState(false);
-  const [selectedUseType, setSelectedUseType] = useState<string>('non-commercial');
-  const [selectedTheme, setSelectedTheme] = useState('light');
+  
+  // Supabase-backed settings state
+  const [userSettings, setUserSettings] = useState<UserSettings | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setSaving] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SettingsSyncStatus | null>(null);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  
+  // Local state for form management
+  const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({});
+  const [apiKeys] = useState<Record<string, string>>({});
   const [openRouterApiKey, setOpenRouterApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
+  const [makeProfilePublic, setMakeProfilePublic] = useState(false);
+  const [recordSearchHistory, setRecordSearchHistory] = useState(true);
+  const [llmConfig] = useState<any>(null);
+  const [testingConnection, setTestingConnection] = useState<string | null>(null);
+  const [connectionResults, setConnectionResults] = useState<Record<string, {success: boolean; error?: string; responseTime?: number}>>({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  
+  const llmService = UnifiedLLMService.getInstance();
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
     cardNumber: '',
     expiryDate: '',
@@ -50,6 +75,182 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
     contextualHelp: false,
     batchProcessing: false
   });
+
+  // Load user settings from Supabase on mount
+  useEffect(() => {
+    const initializeSettings = async () => {
+      try {
+        setIsLoading(true);
+        
+        // For demo accounts, use default settings
+        if (currentUser?.isDemo) {
+          const demoSettings: UserSettings = {
+            ...DEFAULT_USER_SETTINGS,
+            user_id: currentUser.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          setUserSettings(demoSettings);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Initialize the user settings service for non-demo users
+        await userSettingsService.initialize();
+        
+        // Load user settings
+        const settings = await userSettingsService.getUserSettings();
+        setUserSettings(settings);
+        
+        // Get sync status
+        const status = userSettingsService.getSyncStatus();
+        setSyncStatus(status);
+        
+        // Set up event listeners for settings changes
+        userSettingsService.addEventListener('settingsChanged', handleSettingsChanged);
+        userSettingsService.addEventListener('syncStatusChanged', handleSyncStatusChanged);
+        
+      } catch (error) {
+        console.error('Failed to initialize settings:', error);
+        // Use fallback settings on error
+        const fallbackSettings: UserSettings = {
+          ...DEFAULT_USER_SETTINGS,
+          user_id: currentUser?.id || 'demo',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setUserSettings(fallbackSettings);
+        setSaveMessage({ type: 'error', text: 'Using offline settings - some features may be limited' });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (currentUser) {
+      initializeSettings();
+    } else {
+      setIsLoading(false);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      userSettingsService.removeEventListener('settingsChanged', handleSettingsChanged);
+      userSettingsService.removeEventListener('syncStatusChanged', handleSyncStatusChanged);
+    };
+  }, [currentUser]);
+
+  // Handle settings changes from service
+  const handleSettingsChanged = (settings: UserSettings) => {
+    setUserSettings(settings);
+    setHasUnsavedChanges(false);
+  };
+
+  // Handle sync status changes
+  const handleSyncStatusChanged = (status: SettingsSyncStatus) => {
+    setSyncStatus(status);
+  };
+
+  // Update a specific setting
+  const updateSetting = async (key: keyof UserSettings, value: any) => {
+    if (!userSettings) return;
+    
+    try {
+      setHasUnsavedChanges(true);
+      
+      const updatedSettings = {
+        ...userSettings,
+        [key]: value
+      };
+      setUserSettings(updatedSettings);
+      
+    } catch (error) {
+      console.error('Failed to update setting:', error);
+      setSaveMessage({ type: 'error', text: 'Failed to update setting' });
+    }
+  };
+
+  // Save all settings to Supabase
+  const saveSettings = async () => {
+    if (!userSettings || !hasUnsavedChanges) return;
+
+    try {
+      setSaving(true);
+      setSaveMessage(null);
+
+      const result = await userSettingsService.updateUserSettings(userSettings);
+      
+      if (result.success) {
+        setSaveMessage({ type: 'success', text: 'Settings saved successfully!' });
+        setHasUnsavedChanges(false);
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSaveMessage(null), 3000);
+      } else {
+        setSaveMessage({ type: 'error', text: result.message });
+      }
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      setSaveMessage({ type: 'error', text: 'Failed to save settings' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleProviderChange = (providerId: string) => {
+    updateSetting('llm_provider', providerId as any);
+  };
+
+  const handleApiKeyChange = (providerId: string, apiKey: string) => {
+    if (!userSettings) return;
+    
+    const updatedApiKeys = {
+      ...userSettings.api_keys,
+      [providerId]: apiKey
+    };
+    updateSetting('api_keys', updatedApiKeys);
+  };
+
+  const saveApiKey = async (providerId: string) => {
+    if (!userSettings) return;
+    
+    try {
+      setSaving(true);
+      const result = await userSettingsService.updateApiKey(providerId, userSettings.api_keys[providerId] || '');
+      
+      if (result.success) {
+        setSaveMessage({ type: 'success', text: `${LLM_PROVIDERS.find(p => p.id === providerId)?.name} API key saved!` });
+        setTimeout(() => setSaveMessage(null), 3000);
+      } else {
+        setSaveMessage({ type: 'error', text: result.message });
+      }
+    } catch (error) {
+      setSaveMessage({ type: 'error', text: 'Failed to save API key' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const testConnection = async (providerId: string) => {
+    setTestingConnection(providerId);
+    try {
+      const result = await llmService.testConnection(
+        providerId,
+        apiKeys[providerId] || '',
+        LLM_PROVIDERS.find(p => p.id === providerId)?.models[0]?.id
+      );
+      setConnectionResults(prev => ({ ...prev, [providerId]: result }));
+    } catch (error) {
+      setConnectionResults(prev => ({
+        ...prev,
+        [providerId]: {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        }
+      }));
+    } finally {
+      setTestingConnection(null);
+    }
+  };
 
   const tabs = [
     { id: 'Account Settings', label: 'Account Settings' },
@@ -73,7 +274,74 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
         </div>
 
         {/* Header */}
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">Account Settings</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
+          
+          {/* Settings Actions */}
+          <div className="flex items-center gap-3">
+            {/* Sync Status */}
+            {syncStatus && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Cloud className="w-4 h-4" />
+                <span>Last sync: {syncStatus.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : 'Never'}</span>
+              </div>
+            )}
+            
+            {/* Save Button */}
+            <button
+              onClick={saveSettings}
+              disabled={!hasUnsavedChanges || isSaving || isLoading}
+              className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
+                hasUnsavedChanges 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Changes
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Save Message */}
+        {saveMessage && (
+          <div className={`mb-4 p-3 rounded-lg ${
+            saveMessage.type === 'success' 
+              ? 'bg-green-50 border border-green-200 text-green-700' 
+              : 'bg-red-50 border border-red-200 text-red-700'
+          }`}>
+            <div className="flex items-center gap-2">
+              {saveMessage.type === 'success' ? (
+                <CheckCircle className="w-4 h-4" />
+              ) : (
+                <AlertCircle className="w-4 h-4" />
+              )}
+              {saveMessage.text}
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+              <span className="text-gray-600">Loading settings...</span>
+            </div>
+          </div>
+        )}
+
+        {!isLoading && userSettings && (
+          <>
 
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-8">
@@ -119,8 +387,8 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
                           type="radio"
                           name="useType"
                           value="non-commercial"
-                          checked={selectedUseType === 'non-commercial'}
-                          onChange={(e) => setSelectedUseType(e.target.value)}
+                          checked={userSettings?.use_type === 'non-commercial'}
+                          onChange={(e) => updateSetting('use_type', e.target.value as 'non-commercial' | 'commercial')}
                           className="mt-1"
                         />
                         <div>
@@ -139,8 +407,8 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
                           type="radio"
                           name="useType"
                           value="commercial"
-                          checked={selectedUseType === 'commercial'}
-                          onChange={(e) => setSelectedUseType(e.target.value)}
+                          checked={userSettings?.use_type === 'commercial'}
+                          onChange={(e) => updateSetting('use_type', e.target.value as 'non-commercial' | 'commercial')}
                           className="mt-1"
                         />
                         <div>
@@ -244,8 +512,8 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
                         type="radio"
                         name="theme"
                         value="light"
-                        checked={selectedTheme === 'light'}
-                        onChange={(e) => setSelectedTheme(e.target.value)}
+                        checked={userSettings?.theme === 'light'}
+                        onChange={(e) => updateSetting('theme', e.target.value as 'light' | 'dark' | 'vanilla' | 'contrast')}
                       />
                       <span className="text-sm text-gray-700">Light Theme (Default)</span>
                     </label>
@@ -256,8 +524,8 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
                         type="radio"
                         name="theme"
                         value="dark"
-                        checked={selectedTheme === 'dark'}
-                        onChange={(e) => setSelectedTheme(e.target.value)}
+                        checked={userSettings?.theme === 'dark'}
+                        onChange={(e) => updateSetting('theme', e.target.value as 'light' | 'dark' | 'vanilla' | 'contrast')}
                       />
                       <span className="text-sm text-gray-700">Dark Mode (For working at night)</span>
                     </label>
@@ -268,8 +536,8 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
                         type="radio"
                         name="theme"
                         value="vanilla"
-                        checked={selectedTheme === 'vanilla'}
-                        onChange={(e) => setSelectedTheme(e.target.value)}
+                        checked={userSettings?.theme === 'vanilla'}
+                        onChange={(e) => updateSetting('theme', e.target.value as 'light' | 'dark' | 'vanilla' | 'contrast')}
                       />
                       <span className="text-sm text-gray-700">Vanilla (Clean Skin)</span>
                     </label>
@@ -280,8 +548,8 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
                         type="radio"
                         name="theme"
                         value="contrast"
-                        checked={selectedTheme === 'contrast'}
-                        onChange={(e) => setSelectedTheme(e.target.value)}
+                        checked={userSettings?.theme === 'contrast'}
+                        onChange={(e) => updateSetting('theme', e.target.value as 'light' | 'dark' | 'vanilla' | 'contrast')}
                       />
                       <span className="text-sm text-gray-700">High Contrast (WCAG) (For accessibility)</span>
                     </label>
@@ -310,72 +578,200 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
                   <Bot className="w-4 h-4 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-2">AI Assistant</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">AI Assistant - Multi-LLM Support</h3>
                   <p className="text-sm text-gray-700 mb-4">
-                    Configure your AI Assistant settings to chat with the platform and analyze patent data. The AI Assistant uses OpenRouter to provide access to multiple AI models including GPT-4, Claude, and others.
+                    Configure your AI Assistant with support for multiple AI providers including OpenAI, OpenRouter, Anthropic, and Google AI. Choose your preferred provider and manage API keys for seamless AI integration across all platform features.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* OpenRouter API Key */}
+            {/* LLM Provider Selection */}
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Key className="w-5 h-5 text-blue-600" />
-                  OpenRouter API Key
-                </h3>
-                <a 
-                  href="https://openrouter.ai" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                  Get API Key →
-                </a>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Settings className="w-5 h-5 text-blue-600" />
+                LLM Provider Configuration
+              </h3>
               
-              <p className="text-sm text-gray-600 mb-4">
-                Your OpenRouter API key is used to access AI models for the chat assistant. This key is stored securely in your browser and is never sent to our servers except when making API requests to OpenRouter.
-              </p>
-
-              <div className="relative">
-                <div className="flex">
-                  <div className="relative flex-1">
-                    <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type={showApiKey ? "text" : "password"}
-                      value={openRouterApiKey}
-                      onChange={(e) => setOpenRouterApiKey(e.target.value)}
-                      placeholder="sk-or-v1-..."
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowApiKey(!showApiKey)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Select Your Preferred AI Provider
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {LLM_PROVIDERS.map((provider) => (
+                      <label
+                        key={provider.id}
+                        className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                          llmConfig?.provider === provider.id
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="llm-provider"
+                          value={provider.id}
+                          checked={userSettings?.llm_provider === provider.id}
+                          onChange={() => handleProviderChange(provider.id)}
+                          className="sr-only"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{provider.name}</div>
+                          <div className="text-sm text-gray-600">
+                            {provider.models.length} models available
+                            {provider.requiresApiKey && ' • API key required'}
+                          </div>
+                        </div>
+                        {userSettings?.llm_provider === provider.id && (
+                          <CheckCircle className="w-5 h-5 text-blue-600" />
+                        )}
+                      </label>
+                    ))}
                   </div>
-                  <button
-                    onClick={() => {
-                      localStorage.setItem('openrouter_api_key', openRouterApiKey);
-                      alert('API key saved successfully!');
-                    }}
-                    className="px-4 py-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 border border-l-0 border-blue-600"
-                  >
-                    Save
-                  </button>
                 </div>
               </div>
+            </div>
 
-              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            {/* API Keys Management */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Key className="w-5 h-5 text-blue-600" />
+                API Keys Management
+              </h3>
+              
+              <p className="text-sm text-gray-600 mb-6">
+                Configure API keys for different AI providers. Keys are stored securely in your browser and used only for AI requests to the respective providers.
+              </p>
+
+              <div className="space-y-6">
+                {LLM_PROVIDERS.map((provider) => {
+                  const isActive = userSettings?.llm_provider === provider.id;
+                  const connectionResult = connectionResults[provider.id];
+                  
+                  return (
+                    <div
+                      key={provider.id}
+                      className={`border rounded-lg p-6 ${
+                        isActive ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <h4 className="font-medium text-gray-900">{provider.name}</h4>
+                          {isActive && (
+                            <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <a 
+                            href={provider.baseUrl || '#'} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                          >
+                            Get API Key →
+                          </a>
+                        </div>
+                      </div>
+                      
+                      {provider.requiresApiKey && (
+                        <>
+                          <div className="relative mb-4">
+                            <div className="flex">
+                              <div className="relative flex-1">
+                                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <input
+                                  type={showApiKeys[provider.id] ? "text" : "password"}
+                                  value={userSettings?.api_keys[provider.id] || ''}
+                                  onChange={(e) => handleApiKeyChange(provider.id, e.target.value)}
+                                  placeholder={`${provider.name} API Key`}
+                                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowApiKeys(prev => ({ ...prev, [provider.id]: !prev[provider.id] }))}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                  {showApiKeys[provider.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                              </div>
+                              <button
+                                onClick={() => saveApiKey(provider.id)}
+                                disabled={!userSettings?.api_keys[provider.id]}
+                                className="px-4 py-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 border border-l-0 border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {/* Test Connection */}
+                          <div className="flex items-center gap-3 mb-4">
+                            <button
+                              onClick={() => testConnection(provider.id)}
+                              disabled={!userSettings?.api_keys[provider.id] || testingConnection === provider.id}
+                              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                            >
+                              {testingConnection === provider.id ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  Testing...
+                                </>
+                              ) : (
+                                <>
+                                  <TestTube className="w-4 h-4" />
+                                  Test Connection
+                                </>
+                              )}
+                            </button>
+                            
+                            {connectionResult && (
+                              <div className={`flex items-center gap-1 text-sm ${
+                                connectionResult.success ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                <div className={`w-2 h-2 rounded-full ${
+                                  connectionResult.success ? 'bg-green-600' : 'bg-red-600'
+                                }`}></div>
+                                {connectionResult.success 
+                                  ? `Connected (${connectionResult.responseTime}ms)`
+                                  : `Failed: ${connectionResult.error}`
+                                }
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Available Models */}
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">Available models:</span>
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {provider.models.slice(0, 3).map(model => (
+                                <span key={model.id} className="px-2 py-1 bg-gray-100 rounded text-xs">
+                                  {model.name}
+                                </span>
+                              ))}
+                              {provider.models.length > 3 && (
+                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">
+                                  +{provider.models.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div className="flex gap-2">
                   <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-yellow-800">
                     <p className="font-medium mb-1">Security Notice</p>
-                    <p>Your API key is stored locally in your browser and used only for AI chat requests. Never share your API key with others or use it in unsecured environments.</p>
+                    <p>Your API keys are stored locally in your browser and used only for AI requests to the respective providers. Never share your API keys with others or use them in unsecured environments.</p>
                   </div>
                 </div>
               </div>
@@ -389,20 +785,38 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Default AI Model</h4>
                   <p className="text-sm text-gray-600 mb-3">
-                    Choose your preferred AI model for new chat sessions. You can change this per conversation in the chat interface.
+                    Choose your preferred AI model for new chat sessions. Available models depend on your selected provider.
                   </p>
                   <select 
                     className="w-full max-w-sm p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    defaultValue="openai/gpt-3.5-turbo"
+                    value={userSettings?.default_ai_model || ''}
+                    onChange={(e) => updateSetting('default_ai_model', e.target.value)}
                   >
-                    <option value="openai/gpt-4-turbo">GPT-4 Turbo (Recommended)</option>
-                    <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo (Fast & Affordable)</option>
-                    <option value="anthropic/claude-3-opus">Claude 3 Opus (Best Quality)</option>
-                    <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet (Balanced)</option>
-                    <option value="anthropic/claude-3-haiku">Claude 3 Haiku (Fast)</option>
-                    <option value="google/gemini-pro">Gemini Pro</option>
-                    <option value="mistralai/mixtral-8x7b-instruct">Mixtral 8x7B (Open Source)</option>
+                    {userSettings && LLM_PROVIDERS.find(p => p.id === userSettings.llm_provider)?.models.map(model => (
+                      <option key={model.id} value={model.id}>
+                        {model.name} {model.description && `(${model.description})`}
+                      </option>
+                    ))}
                   </select>
+                  
+                  {userSettings?.default_ai_model && (
+                    <div className="mt-2 text-sm text-gray-600">
+                      {(() => {
+                        const selectedModel = LLM_PROVIDERS
+                          .find(p => p.id === userSettings.llm_provider)
+                          ?.models.find(m => m.id === userSettings.default_ai_model);
+                        return selectedModel ? (
+                          <div className="space-y-1">
+                            <div>Max tokens: {selectedModel.maxTokens.toLocaleString()}</div>
+                            {selectedModel.costPer1kTokens && (
+                              <div>Cost: ${selectedModel.costPer1kTokens} per 1K tokens</div>
+                            )}
+                          </div>
+                        ) : null;
+                      })()
+                      }
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1196,6 +1610,8 @@ export default function AccountSettings({ user: _user }: AccountSettingsProps) {
               </div>
             </div>
           </div>
+        )}
+        </>
         )}
       </div>
     </div>

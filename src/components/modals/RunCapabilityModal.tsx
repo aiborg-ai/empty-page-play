@@ -3,6 +3,7 @@ import { X, Clock, Folder, CheckCircle, Play } from 'lucide-react';
 import { Capability, RunCapabilityRequest, CapabilityParameter } from '../../types/capabilities';
 import { Project } from '../../types/cms';
 import { getProjectAssetCount } from '../../utils/showcaseUtils';
+import DataDictionaryViewer from '../DataDictionaryViewer';
 
 interface RunCapabilityModalProps {
   isOpen: boolean;
@@ -129,27 +130,35 @@ export const RunCapabilityModal = ({
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Project Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Select Project *
-            </label>
-            <select
-              value={selectedProjectId}
-              onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Choose a project...</option>
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name} ({getProjectAssetCount(project)} assets)
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-gray-500 mt-2">
-              All generated assets will be saved to the selected project
-            </p>
-          </div>
+          {/* Show DataDictionaryViewer for dataset capabilities */}
+          {capability.type === 'dataset' && capability.id.startsWith('dataset-') ? (
+            <DataDictionaryViewer 
+              dictionaryId={capability.id} 
+              title={capability.name}
+            />
+          ) : (
+            <>
+              {/* Project Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Select Project *
+                </label>
+                <select
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Choose a project...</option>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name} ({getProjectAssetCount(project)} assets)
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-2">
+                  All generated assets will be saved to the selected project
+                </p>
+              </div>
 
           {/* Parameters */}
           {capability.parameters.length > 0 && (
@@ -204,24 +213,26 @@ export const RunCapabilityModal = ({
             </div>
           </div>
 
-          {/* Estimated Output */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">Expected Output</h4>
-            <div className="space-y-1 text-sm text-blue-800">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>Estimated runtime: {capability.estimatedRunTime}</span>
+              {/* Estimated Output */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-medium text-blue-900 mb-2">Expected Output</h4>
+                <div className="space-y-1 text-sm text-blue-800">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>Estimated runtime: {capability.estimatedRunTime}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Folder className="w-4 h-4" />
+                    <span>Asset types: {capability.outputTypes.join(', ')}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Success rate: {Math.round(capability.successRate * 100)}%</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Folder className="w-4 h-4" />
-                <span>Asset types: {capability.outputTypes.join(', ')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" />
-                <span>Success rate: {Math.round(capability.successRate * 100)}%</span>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
@@ -229,16 +240,18 @@ export const RunCapabilityModal = ({
             onClick={onClose}
             className="px-4 py-2 text-gray-700 border border-gray-300 rounded hover:bg-gray-100"
           >
-            Cancel
+            {capability.type === 'dataset' ? 'Close' : 'Cancel'}
           </button>
-          <button
-            onClick={handleRun}
-            disabled={!selectedProjectId}
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <Play className="w-4 h-4" />
-            Run Capability
-          </button>
+          {capability.type !== 'dataset' && (
+            <button
+              onClick={handleRun}
+              disabled={!selectedProjectId}
+              className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <Play className="w-4 h-4" />
+              Run Capability
+            </button>
+          )}
         </div>
       </div>
     </div>

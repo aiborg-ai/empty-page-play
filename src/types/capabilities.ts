@@ -1,8 +1,8 @@
 // Capability marketplace types and interfaces
 
-export type CapabilityCategory = 'analysis' | 'search' | 'visualization' | 'ai' | 'automation' | 'collaboration';
+export type CapabilityCategory = 'analysis' | 'search' | 'visualization' | 'ai' | 'automation' | 'collaboration' | 'mcp' | 'datasets';
 export type CapabilityStatus = 'available' | 'purchased' | 'enabled' | 'disabled' | 'shared';
-export type CapabilityType = 'tool' | 'dashboard' | 'ai-agent' | 'workflow' | 'integration';
+export type CapabilityType = 'tool' | 'dashboard' | 'ai-agent' | 'workflow' | 'integration' | 'dataset' | 'report';
 
 export interface CapabilityProvider {
   id: string;
@@ -65,7 +65,7 @@ export interface Capability {
   price: {
     amount: number;
     currency: string;
-    billingType: 'one-time' | 'monthly' | 'per-use';
+    billingType: 'one-time' | 'monthly' | 'per-use' | 'free';
   };
   freeTrialAvailable: boolean;
   trialDuration?: number; // days
@@ -103,13 +103,21 @@ export interface Capability {
     maxShares: number;
     currentShares: number;
   };
+  
+  // Additional optional properties
+  features?: Array<{
+    name: string;
+    description: string;
+    icon?: string;
+  }>;
+  integrations?: string[];
 }
 
 export interface CapabilityParameter {
   id: string;
   name: string;
   label: string;
-  type: 'text' | 'number' | 'boolean' | 'select' | 'multi-select' | 'file' | 'date' | 'range';
+  type: 'text' | 'number' | 'boolean' | 'select' | 'multi-select' | 'file' | 'date' | 'range' | 'password' | 'checkbox';
   required: boolean;
   defaultValue?: any;
   options?: Array<{ value: any; label: string }>;
@@ -121,6 +129,7 @@ export interface CapabilityParameter {
     maxLength?: number;
   };
   description: string;
+  placeholder?: string;
   helpText?: string;
 }
 

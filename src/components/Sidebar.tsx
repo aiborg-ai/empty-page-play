@@ -9,7 +9,6 @@ import {
   User,
   Settings,
   BookOpen,
-  Archive,
   BarChart3,
   Search,
   Zap,
@@ -21,11 +20,24 @@ import {
   Eye,
   X,
   Home,
-  Shield
+  Shield,
+  Sparkles,
+  Target,
+  Brain,
+  TrendingUp,
+  Key,
+  MessageSquare,
+  HelpCircle,
+  Activity,
+  DollarSign,
+  Dna,
+  Globe,
+  Map,
+  Compass
 } from 'lucide-react';
 import { AuthService } from '../lib/authService';
-import { ProjectContextService } from '../lib/projectContext';
-import { Project } from '../types/projects';
+import { SpaceContextService } from '../lib/spaceContext';
+import { Space } from '../types/spaces';
 
 interface SidebarProps {
   activeSection?: string;
@@ -35,15 +47,15 @@ interface SidebarProps {
 
 export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: SidebarProps) {
   const [activeMainMenu, setActiveMainMenu] = useState<string | null>('studio');
-  const [currentProject, setCurrentProject] = useState<Project | null>(null);
+  const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const contextService = ProjectContextService.getInstance();
+    const contextService = SpaceContextService.getInstance();
     contextService.initialize();
     
-    const unsubscribe = contextService.addProjectChangeListener((project) => {
-      setCurrentProject(project);
+    const unsubscribe = contextService.addSpaceChangeListener((space) => {
+      setCurrentSpace(space);
     });
 
     // Check if user is admin
@@ -53,9 +65,9 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
     return unsubscribe;
   }, []);
 
-  const handleUnsetProject = () => {
-    const contextService = ProjectContextService.getInstance();
-    contextService.setCurrentProject(null);
+  const handleUnsetSpace = () => {
+    const contextService = SpaceContextService.getInstance();
+    contextService.setCurrentSpace(null);
   };
 
   // Main menu items - top section
@@ -63,23 +75,30 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
     { icon: Home, label: 'Home', id: 'dashboard' },
     { icon: Store, label: 'Showcase', id: 'showcase' },
     { icon: Briefcase, label: 'Studio', id: 'studio' },
-    { icon: Bot, label: 'AI Assistant', id: 'ai-assistant', isSpecial: true },
+    { icon: Sparkles, label: 'Innovation Hub', id: 'innovation-hub', isSpecial: true },
+    { icon: Brain, label: 'Decision Engines', id: 'decision-engines', isSpecial: true },
+    { icon: Activity, label: 'Patent Monitoring', id: 'patent-monitoring', isSpecial: true },
+    { icon: DollarSign, label: 'Patent Valuation', id: 'patent-valuation', isSpecial: true },
+    { icon: Shield, label: 'Competitive Intel', id: 'competitive-intelligence', isSpecial: true },
     { icon: FileText, label: 'Reports', id: 'reports' },
-    { icon: Users, label: 'Network', id: 'network' }
+    { icon: Users, label: 'Collab Hub', id: 'network' }
   ];
 
   // Main menu items - bottom section
   const bottomMenuItems = [
+    { icon: Bot, label: 'AI Assistant', id: 'ai-assistant' },
+    { icon: MessageSquare, label: 'Messages', id: 'messages' },
     { icon: Bell, label: 'Notifications', id: 'notifications' },
     { icon: User, label: 'Profile', id: 'profile' },
     { icon: Settings, label: 'Settings', id: 'settings' },
+    { icon: HelpCircle, label: 'Support', id: 'support' },
     ...(isAdmin ? [{ icon: Shield, label: 'CMS Admin', id: 'cms-admin' }] : [])
   ];
 
   // Secondary menu items for each main menu
   const secondaryMenus = {
     studio: [
-      { icon: BookOpen, label: 'Projects', id: 'projects' },
+      { icon: BookOpen, label: 'Spaces', id: 'projects' },
       { icon: Zap, label: 'AI Agents', id: 'ai-agents' },
       { icon: Wrench, label: 'Tools', id: 'tools' },
       { icon: Search, label: 'Search', id: 'search' },
@@ -87,17 +106,22 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
       { icon: BarChart3, label: 'Dashboard', id: 'dashboards' },
       { icon: FileText, label: 'Reports', id: 'studio-reports' }
     ],
-    reports: [
-      { icon: BarChart3, label: 'All Reports', id: 'all-reports' },
-      { icon: BookOpen, label: 'My Reports', id: 'my-reports' },
-      { icon: Users, label: 'Shared Reports', id: 'shared-reports' },
-      { icon: Archive, label: 'Templates', id: 'report-templates' }
-    ],
-    network: [
-      { icon: Users, label: 'Connections', id: 'connections' },
-      { icon: Search, label: 'Discover', id: 'discover-network' },
-      { icon: Bell, label: 'Invitations', id: 'invitations' },
-      { icon: Settings, label: 'Privacy', id: 'network-privacy' }
+    'innovation-hub': [
+      // Revolutionary Innovation Intelligence
+      { icon: Dna, label: 'Patent DNA Sequencer', id: 'patent-dna-sequencer', isSpecial: true },
+      { icon: Globe, label: 'Innovation Pulse Monitor', id: 'innovation-pulse-monitor', isSpecial: true },
+      { icon: Map, label: 'White Space Cartographer', id: 'white-space-cartographer', isSpecial: true },
+      { icon: Compass, label: 'Collision Predictor', id: 'invention-collision-predictor', isSpecial: true },
+      // Traditional Tools
+      { icon: Target, label: 'Opportunity Scanner', id: 'opportunity-gap-scanner' },
+      { icon: FileText, label: 'AI Patent Claims', id: 'ai-patent-claims' },
+      { icon: Brain, label: 'Prior Art Oracle', id: 'prior-art-oracle' },
+      { icon: TrendingUp, label: 'Trajectory Predictor', id: 'trajectory-predictor' },
+      { icon: Zap, label: 'AI Claim Generator', id: 'ai-claim-generator' },
+      { icon: Search, label: 'Collision Detection', id: 'collision-detection' },
+      { icon: Eye, label: '3D Citation Viz', id: 'citation-3d' },
+      { icon: Shield, label: 'Blockchain Provenance', id: 'blockchain-provenance' },
+      { icon: Key, label: 'AI Configuration', id: 'ai-services-config' }
     ],
     notifications: [
       { icon: Bell, label: 'All Notifications', id: 'all-notifications' },
@@ -125,7 +149,7 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
       return;
     }
     
-    if (menuId === 'showcase' || menuId === 'dashboard' || menuId === 'cms-admin') {
+    if (menuId === 'showcase' || menuId === 'dashboard' || menuId === 'cms-admin' || menuId === 'innovation-hub' || menuId === 'reports' || menuId === 'decision-engines' || menuId === 'patent-monitoring' || menuId === 'patent-valuation' || menuId === 'competitive-intelligence') {
       setActiveMainMenu(null);
       onNavigate?.(menuId);
       return;
@@ -223,21 +247,21 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
                 {[...topMenuItems, ...bottomMenuItems].find((item: any) => item.id === activeMainMenu)?.label}
               </div>
               
-              {/* Current Project Display for Studio */}
-              {activeMainMenu === 'studio' && currentProject && (
+              {/* Current Space Display for Studio */}
+              {activeMainMenu === 'studio' && currentSpace && (
                 <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <div 
                         className="w-3 h-3 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: currentProject.color }}
+                        style={{ backgroundColor: currentSpace.color }}
                       />
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-medium text-gray-900 truncate">
-                          {currentProject.name}
+                          {currentSpace.name}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Current Project
+                          Current Space
                         </div>
                       </div>
                     </div>
@@ -245,14 +269,14 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
                       <button
                         onClick={() => onNavigate?.('projects')}
                         className="p-1 text-gray-400 hover:text-blue-600 rounded"
-                        title="View Project Details"
+                        title="View Space Details"
                       >
                         <Eye className="w-3 h-3" />
                       </button>
                       <button
-                        onClick={handleUnsetProject}
+                        onClick={handleUnsetSpace}
                         className="p-1 text-gray-400 hover:text-red-600 rounded"
-                        title="Unset Current Project"
+                        title="Unset Current Space"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -261,15 +285,15 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
                 </div>
               )}
 
-              {/* No Project Selected for Studio */}
-              {activeMainMenu === 'studio' && !currentProject && (
+              {/* No Space Selected for Studio */}
+              {activeMainMenu === 'studio' && !currentSpace && (
                 <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <div className="text-xs text-yellow-800 mb-1">No project selected</div>
+                  <div className="text-xs text-yellow-800 mb-1">No space selected</div>
                   <button
                     onClick={() => onNavigate?.('projects')}
                     className="text-xs text-yellow-700 hover:text-yellow-900 underline"
                   >
-                    Select a project to get started
+                    Select a space to get started
                   </button>
                 </div>
               )}

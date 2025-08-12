@@ -1,0 +1,14 @@
+Professional_Role,Engine_Name,Total_Steps,Workflow_Type,Primary_Inputs,Visualization_Count,Complexity
+Patent Attorneys,Patentability Assessment Engine,5,linear_with_branching,3,3,Intermediate
+Patent Attorneys,Filing Strategy Engine,6,adaptive_complex,3,3,Complex
+Patent Attorneys,Prosecution Response Engine,4,linear_guided,3,3,Intermediate
+Patent Attorneys,Portfolio Pruning Engine,5,dashboard_analytical,3,3,Intermediate
+Trademark Attorneys,Trademark Clearance Engine,4,linear_with_deep_analysis,3,3,Intermediate
+Trademark Attorneys,Registration Strategy Engine,5,strategic_planning,3,3,Intermediate
+Trademark Attorneys,Enforcement Decision Engine,4,decision_focused,3,3,Intermediate
+IP Managers,IP Budget Allocation Engine,6,financial_modeling,3,3,Complex
+IP Managers,Licensing Decision Engine,5,comparative_analysis,3,3,Intermediate
+IP Managers,Risk Assessment Engine,5,risk_analytical,3,3,Intermediate
+Innovation Managers,Innovation Pipeline Engine,5,portfolio_management,3,3,Intermediate
+Innovation Managers,Technology Scouting Engine,4,opportunity_discovery,3,3,Intermediate
+Innovation Managers,Partnership Decision Engine,5,strategic_partnership,3,3,Intermediate

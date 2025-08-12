@@ -1,7 +1,7 @@
 // Service for generating and managing sample assets from capabilities
 
-import { ProjectAsset } from '../types/projects';
-import { ProjectContextService } from './projectContext';
+import { SpaceAsset } from '../types/spaces';
+import { SpaceContextService } from './spaceContext';
 
 export class SampleAssetsService {
   private static instance: SampleAssetsService;
@@ -14,10 +14,10 @@ export class SampleAssetsService {
   }
 
   // Generate sample assets for "Try Once" functionality (AI agents, Deep Dive)
-  generateTryOnceSample(capabilityName: string, capabilityType: string): ProjectAsset[] {
+  generateTryOnceSample(capabilityName: string, capabilityType: string): SpaceAsset[] {
     const baseId = `sample_${Date.now()}`;
     
-    const sampleAssets: ProjectAsset[] = [];
+    const sampleAssets: SpaceAsset[] = [];
 
     if (capabilityType === 'ai-agent' || capabilityName.toLowerCase().includes('ai')) {
       // AI Agent sample assets
@@ -31,7 +31,7 @@ export class SampleAssetsService {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           createdBy: 'system',
-          isSharedFromOtherProject: false,
+          isSharedFromOtherSpace: false,
           tags: ['sample', 'ai-generated', 'trial'],
           metadata: {
             sampleData: true,
@@ -58,7 +58,7 @@ export class SampleAssetsService {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           createdBy: 'system',
-          isSharedFromOtherProject: false,
+          isSharedFromOtherSpace: false,
           tags: ['sample', 'dashboard', 'insights'],
           metadata: {
             sampleData: true,
@@ -86,7 +86,7 @@ export class SampleAssetsService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: 'system',
-        isSharedFromOtherProject: false,
+        isSharedFromOtherSpace: false,
         tags: ['sample', 'deep-dive', 'comprehensive'],
         metadata: {
           sampleData: true,
@@ -107,9 +107,9 @@ export class SampleAssetsService {
   }
 
   // Generate sample assets for "Sample me" functionality (Datasets, Reports)
-  generateSampleData(capabilityName: string, capabilityType: string): ProjectAsset[] {
+  generateSampleData(capabilityName: string, capabilityType: string): SpaceAsset[] {
     const baseId = `sample_${Date.now()}`;
-    const sampleAssets: ProjectAsset[] = [];
+    const sampleAssets: SpaceAsset[] = [];
 
     if (capabilityType === 'dataset' || capabilityName.toLowerCase().includes('dataset')) {
       // Dataset sample assets
@@ -123,7 +123,7 @@ export class SampleAssetsService {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           createdBy: 'system',
-          isSharedFromOtherProject: false,
+          isSharedFromOtherSpace: false,
           tags: ['sample', 'dataset', 'anonymized'],
           metadata: {
             sampleData: true,
@@ -148,7 +148,7 @@ export class SampleAssetsService {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           createdBy: 'system',
-          isSharedFromOtherProject: false,
+          isSharedFromOtherSpace: false,
           tags: ['sample', 'schema', 'documentation'],
           metadata: {
             sampleData: true,
@@ -175,7 +175,7 @@ export class SampleAssetsService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: 'system',
-        isSharedFromOtherProject: false,
+        isSharedFromOtherSpace: false,
         tags: ['sample', 'report', 'preview'],
         metadata: {
           sampleData: true,
@@ -197,21 +197,21 @@ export class SampleAssetsService {
     return sampleAssets;
   }
 
-  // Add sample assets to current project and return them for immediate Studio access
-  async addSampleAssetsToStudio(assets: ProjectAsset[]): Promise<void> {
-    const contextService = ProjectContextService.getInstance();
-    const currentProject = contextService.getCurrentProject();
+  // Add sample assets to current space and return them for immediate Studio access
+  async addSampleAssetsToStudio(assets: SpaceAsset[]): Promise<void> {
+    const contextService = SpaceContextService.getInstance();
+    const currentProject = contextService.getCurrentSpace();
 
     if (!currentProject) {
-      throw new Error('No active project. Please select a project first.');
+      throw new Error('No active space. Please select a space first.');
     }
 
-    // Add assets directly to project
-    const projectAssets = assets;
+    // Add assets directly to space
+    const spaceAssets = assets;
 
-    // Add assets to current project
-    for (const asset of projectAssets) {
-      contextService.addAssetToCurrentProject(asset);
+    // Add assets to current space
+    for (const asset of spaceAssets) {
+      contextService.addAssetToCurrentSpace(asset);
     }
 
     // Log the sample generation activity
@@ -236,7 +236,7 @@ export class SampleAssetsService {
   }
 
   // Generate summary for user notification
-  generateSampleSummary(assets: ProjectAsset[]): string {
+  generateSampleSummary(assets: SpaceAsset[]): string {
     const types = assets.reduce((acc, asset) => {
       acc[asset.type] = (acc[asset.type] || 0) + 1;
       return acc;

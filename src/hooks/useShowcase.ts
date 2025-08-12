@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Capability, CapabilityCategory, RunCapabilityRequest } from '../types/capabilities';
 import { Project } from '../types/cms';
 import { ShowcaseService } from '../lib/showcaseService';
-import ProjectService from '../lib/projectService';
+import SpaceService from '../lib/spaceService';
 import { InstantAuthService } from '../lib/instantAuth';
 import { MOCK_CAPABILITIES } from '../constants/mockCapabilities';
 import { validateProjectSelection } from '../utils/showcaseUtils';
@@ -46,7 +46,7 @@ export const useShowcase = (initialCategory: CapabilityCategory | 'all' = 'all')
       try {
         const user = InstantAuthService.getCurrentUser();
         if (user) {
-          const projects = await ProjectService.getUserProjects(user.id);
+          const projects = await SpaceService.getUserSpaces(user.id);
           setUserProjects(projects);
         }
       } catch (error) {
@@ -59,9 +59,24 @@ export const useShowcase = (initialCategory: CapabilityCategory | 'all' = 'all')
 
   // Compute display capabilities (with fallback to mock data)
   const displayCapabilities = useMemo(() => {
-    const dataToUse = capabilities.length > 0 ? capabilities : (loading ? [] : MOCK_CAPABILITIES);
+    let dataToUse = capabilities.length > 0 ? capabilities : (loading ? [] : MOCK_CAPABILITIES);
+    
+    // Apply category filter to mock data if using fallback
+    if (capabilities.length === 0 && !loading && selectedCategory !== 'all') {
+      dataToUse = dataToUse.filter(cap => cap.category === selectedCategory);
+    }
+    
+    // Apply search filter
+    if (searchQuery) {
+      dataToUse = dataToUse.filter(cap => 
+        cap.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cap.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cap.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+    
     return dataToUse;
-  }, [capabilities, loading]);
+  }, [capabilities, loading, selectedCategory, searchQuery]);
 
   // Event Handlers
   const handleRunCapability = (capability: Capability) => {

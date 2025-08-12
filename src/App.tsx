@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { InstantAuthService, InstantUser } from './lib/instantAuth';
-import { Search, Filter, Plus, Bot, Wrench, Database, FileText, Eye, X } from 'lucide-react';
+import { Search, Filter, Plus, Bot, Wrench, Database, Eye, X } from 'lucide-react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
 import RegisterForm from './components/RegisterForm';
 import LoginForm from './components/LoginForm';
-import UserDashboard from './components/UserDashboard';
 import AccountSettings from './components/AccountSettings';
 import PlatformTour from './components/PlatformTour';
 import PatentSearch from './components/PatentSearch';
@@ -17,22 +16,51 @@ import LegalStatusDashboard from './components/LegalStatusDashboard';
 import OwnersDashboard from './components/OwnersDashboard';
 import WorkArea from './components/WorkArea';
 import ProjectsSupport from './components/ProjectsSupport';
-import Projects from './components/Projects';
+import Spaces from './components/Spaces';
 import UserDashboards from './components/UserDashboards';
 import DashboardsSupport from './components/DashboardsSupport';
 import ClaimedWork from './components/ClaimedWork';
 import ClaimedWorkSupport from './components/ClaimedWorkSupport';
 import AIChat from './components/AIChat';
 import AIChatSupport from './components/AIChatSupport';
-import Showcase from './components/Showcase';
+import ShowcaseModern from './components/ShowcaseModern';
 import CMSAdmin from './components/CMSAdmin';
-import CMSStudio from './components/CMSStudio';
+import CMSStudioModern from './components/CMSStudioModern';
 import SubscriptionDetails from './components/SubscriptionDetails';
 import Checkout from './components/Checkout';
 import PaymentSuccess from './components/PaymentSuccess';
+// Innovation Hub Components
+import InnovationHub from './components/InnovationHub';
+import Home from './components/Home';
+import ReportsModern from './components/ReportsModern';
+import AIClaimGenerator from './components/AIClaimGenerator';
+import CollisionDetection from './components/CollisionDetection';
+import Citation3DVisualization from './components/Citation3DVisualization';
+import BlockchainProvenance from './components/BlockchainProvenance';
+
+// New AI Intelligence Features
+import OpportunityGapScanner from './components/OpportunityGapScanner';
+import AIPatentClaimGenerator from './components/AIPatentClaimGenerator';
+import PriorArtOracle from './components/PriorArtOracle';
+import InnovationTrajectoryPredictor from './components/InnovationTrajectoryPredictor';
+import AIServicesConfig from './components/AIServicesConfig';
+import NetworkPage from './components/NetworkPage';
+import Messages from './components/Messages';
+import DecisionEngines from './components/DecisionEngines';
+import PatentMonitoring from './components/PatentMonitoring';
+import PatentValuation from './components/PatentValuation';
+import CompetitiveIntelligence from './components/CompetitiveIntelligence';
+import SupportPage from './components/SupportPage';
+
+// Revolutionary Innovation Intelligence Components
+import PatentDNASequencer from './components/PatentDNASequencer';
+import InnovationPulseMonitor from './components/InnovationPulseMonitor';
+import WhiteSpaceCartographer from './components/WhiteSpaceCartographer';
+import InventionCollisionPredictor from './components/InventionCollisionPredictor';
+
 import { Product, CartItem } from './types/subscription';
-import { ProjectContextService } from './lib/projectContext';
-import { Project } from './types/projects';
+import { SpaceContextService } from './lib/spaceContext';
+import { Space } from './types/spaces';
 
 function App() {
   const [activeSection, setActiveSection] = useState('register');
@@ -43,12 +71,17 @@ function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [invoiceId, setInvoiceId] = useState<string>('');
   const [showcaseCategory, setShowcaseCategory] = useState<string>('all');
-  const [currentProject, setCurrentProject] = useState<Project | null>(null);
+  const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
+  const [supportSection, setSupportSection] = useState<string | undefined>(undefined);
 
   const navigate = (section: string, category?: string) => {
     setActiveSection(section);
     if (category) {
-      setShowcaseCategory(category);
+      if (section === 'support') {
+        setSupportSection(category);
+      } else {
+        setShowcaseCategory(category);
+      }
     }
   };
 
@@ -60,12 +93,12 @@ function App() {
       setActiveSection('showcase');
     }
     
-    // Initialize project context
-    const contextService = ProjectContextService.getInstance();
+    // Initialize space context
+    const contextService = SpaceContextService.getInstance();
     contextService.initialize();
     
-    const unsubscribe = contextService.addProjectChangeListener((project) => {
-      setCurrentProject(project);
+    const unsubscribe = contextService.addSpaceChangeListener((space) => {
+      setCurrentSpace(space);
     });
 
     return unsubscribe;
@@ -138,13 +171,13 @@ function App() {
   };
 
   const handleUnsetProject = () => {
-    const contextService = ProjectContextService.getInstance();
-    contextService.setCurrentProject(null);
+    const contextService = SpaceContextService.getInstance();
+    contextService.setCurrentSpace(null);
   };
 
   // Current Project Display Component
   const CurrentProjectBanner = () => {
-    if (!currentProject) return null;
+    if (!currentSpace) return null;
     
     return (
       <div className="bg-blue-50 border-b border-blue-200 px-6 py-3">
@@ -152,14 +185,14 @@ function App() {
           <div className="flex items-center gap-3">
             <div 
               className="w-4 h-4 rounded-full"
-              style={{ backgroundColor: currentProject.color }}
+              style={{ backgroundColor: currentSpace.color }}
             />
             <div>
               <div className="text-sm font-medium text-blue-900">
-                Working on: {currentProject.name}
+                Working on: {currentSpace.name}
               </div>
               <div className="text-xs text-blue-700">
-                {currentProject.assetCount} assets • {currentProject.collaboratorCount} members
+                {currentSpace.assetCount} assets • {currentSpace.collaboratorCount} members
               </div>
             </div>
           </div>
@@ -253,14 +286,8 @@ function App() {
           )}
 
           {activeSection === 'dashboard' && currentUser && (
-            <div>
-              <div className="mb-6">
-                <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-                  <span>🏠</span>
-                  <span>Dashboard</span>
-                </div>
-              </div>
-              <UserDashboard user={currentUser} />
+            <div className="flex-1 -m-6">
+              <Home user={currentUser} onNavigate={handleNavigate} />
             </div>
           )}
 
@@ -277,9 +304,9 @@ function App() {
             <div className="h-full bg-gray-50 flex flex-col">
               <CurrentProjectBanner />
               <div className="flex-1 -m-6">
-                <CMSStudio 
+                <CMSStudioModern 
                   currentUser={currentUser} 
-                  projectId={currentProject?.id}
+                  projectId={currentSpace?.id}
                 />
               </div>
             </div>
@@ -332,7 +359,7 @@ function App() {
           
           {activeSection === 'projects' && currentUser && (
             <div className="flex-1 -m-6">
-              <Projects onNavigate={handleNavigate} />
+              <Spaces onNavigate={handleNavigate} />
             </div>
           )}
           
@@ -379,7 +406,7 @@ function App() {
           )}
           
           {activeSection === 'account-settings' && currentUser && (
-            <AccountSettings user={currentUser} />
+            <AccountSettings user={currentUser} currentUser={currentUser} />
           )}
           
           {/* Studio Secondary Navigation Routes */}
@@ -582,65 +609,12 @@ function App() {
           )}
 
           {activeSection === 'reports' && currentUser && (
-            <div className="h-full bg-gray-50 flex flex-col">
-              <CurrentProjectBanner />
-              <div className="bg-white border-b border-gray-200 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                        <FileText className="w-5 h-5 text-indigo-600" />
-                      </div>
-                      <div>
-                        <h1 className="text-2xl font-semibold text-gray-900">Reports</h1>
-                        <p className="text-sm text-gray-600">Generate and manage analytical reports and insights.</p>
-                      </div>
-                    </div>
-                  </div>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    <Plus className="w-4 h-4" />
-                    Create Report
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-white border-b border-gray-200 px-6 py-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 relative">
-                    <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search reports..."
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button className="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">Recent</button>
-                    <button className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium">Shared with me</button>
-                    <button className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium">All Reports</button>
-                  </div>
-                  <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                    <Filter className="w-4 h-4" />
-                    More Filters
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
-                    <FileText className="w-8 h-8 text-indigo-600" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No reports yet</h3>
-                  <p className="text-gray-600 mb-6 max-w-md">
-                    Create analytical reports from your research data and share insights with your team.
-                  </p>
-                  <button className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    <Plus className="w-4 h-4" />
-                    Create First Report
-                  </button>
-                </div>
-              </div>
+            <div className="flex-1 -m-6">
+              <ReportsModern 
+                currentUser={currentUser} 
+                projectId={currentSpace?.id}
+                onNavigate={handleNavigate}
+              />
             </div>
           )}
           
@@ -666,12 +640,15 @@ function App() {
           
           {/* Network Secondary Navigation Routes */}
           {activeSection === 'connections' && currentUser && (
-            <div className="max-w-6xl mx-auto p-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-6">Connections</h1>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-                <p className="text-gray-600">Network connections - coming soon</p>
-              </div>
-            </div>
+            <NetworkPage currentUser={currentUser} />
+          )}
+          
+          {activeSection === 'network' && currentUser && (
+            <NetworkPage currentUser={currentUser} />
+          )}
+          
+          {activeSection === 'messages' && currentUser && (
+            <Messages currentUser={currentUser} />
           )}
           
           {/* Notifications Secondary Navigation Routes */}
@@ -713,7 +690,7 @@ function App() {
           
           {activeSection === 'showcase' && currentUser && (
             <div className="flex-1 -m-6">
-              <Showcase 
+              <ShowcaseModern 
                 onNavigate={handleNavigate} 
                 initialCategory={showcaseCategory as any}
               />
@@ -723,6 +700,169 @@ function App() {
           {activeSection === 'cms-admin' && currentUser && (
             <div className="flex-1 -m-6">
               <CMSAdmin onNavigate={handleNavigate} />
+            </div>
+          )}
+
+          {/* Innovation Hub Features */}
+          {activeSection === 'innovation-hub' && currentUser && (
+            <div className="flex-1 -m-6">
+              <InnovationHub 
+                currentUser={currentUser} 
+                projectId={currentSpace?.id}
+                onNavigateToFeature={(feature) => setActiveSection(feature)}
+              />
+            </div>
+          )}
+
+          {/* Decision Engines */}
+          {activeSection === 'decision-engines' && currentUser && (
+            <div className="flex-1 -m-6">
+              <DecisionEngines 
+                currentUser={currentUser}
+                onNavigate={(section) => setActiveSection(section)}
+              />
+            </div>
+          )}
+
+          {/* Patent Monitoring */}
+          {activeSection === 'patent-monitoring' && currentUser && (
+            <div className="flex-1 -m-6">
+              <PatentMonitoring 
+                currentUser={currentUser}
+                onNavigate={(section) => setActiveSection(section)}
+              />
+            </div>
+          )}
+
+          {/* Patent Valuation */}
+          {activeSection === 'patent-valuation' && currentUser && (
+            <div className="flex-1 -m-6">
+              <PatentValuation 
+                currentUser={currentUser}
+                onNavigate={(section) => setActiveSection(section)}
+              />
+            </div>
+          )}
+
+          {/* Competitive Intelligence */}
+          {activeSection === 'competitive-intelligence' && currentUser && (
+            <div className="flex-1 -m-6">
+              <CompetitiveIntelligence 
+                currentUser={currentUser}
+                onNavigate={(section) => setActiveSection(section)}
+              />
+            </div>
+          )}
+
+          {/* Revolutionary Innovation Intelligence Components */}
+          {activeSection === 'patent-dna-sequencer' && currentUser && (
+            <div className="flex-1 -m-6">
+              <PatentDNASequencer onNavigate={navigate} />
+            </div>
+          )}
+
+          {activeSection === 'innovation-pulse-monitor' && currentUser && (
+            <div className="flex-1 -m-6">
+              <InnovationPulseMonitor onNavigate={navigate} />
+            </div>
+          )}
+
+          {activeSection === 'white-space-cartographer' && currentUser && (
+            <div className="flex-1 -m-6">
+              <WhiteSpaceCartographer onNavigate={navigate} />
+            </div>
+          )}
+
+          {activeSection === 'invention-collision-predictor' && currentUser && (
+            <div className="flex-1 -m-6">
+              <InventionCollisionPredictor onNavigate={navigate} />
+            </div>
+          )}
+
+          {activeSection === 'ai-claim-generator' && currentUser && (
+            <div className="flex-1 -m-6">
+              <AIClaimGenerator 
+                currentUser={currentUser} 
+                projectId={currentSpace?.id}
+              />
+            </div>
+          )}
+
+          {activeSection === 'collision-detection' && currentUser && (
+            <div className="flex-1 -m-6">
+              <CollisionDetection 
+                currentUser={currentUser} 
+                projectId={currentSpace?.id}
+              />
+            </div>
+          )}
+
+          {activeSection === 'citation-3d' && currentUser && (
+            <div className="flex-1 -m-6">
+              <Citation3DVisualization 
+                currentUser={currentUser} 
+                projectId={currentSpace?.id}
+              />
+            </div>
+          )}
+
+          {activeSection === 'blockchain-provenance' && currentUser && (
+            <div className="flex-1 -m-6">
+              <BlockchainProvenance 
+                currentUser={currentUser} 
+                projectId={currentSpace?.id}
+              />
+            </div>
+          )}
+
+          {/* New AI Intelligence Features */}
+          {activeSection === 'opportunity-gap-scanner' && currentUser && (
+            <div className="flex-1 -m-6">
+              <OpportunityGapScanner 
+                currentUser={currentUser} 
+                projectId={currentSpace?.id}
+              />
+            </div>
+          )}
+
+          {activeSection === 'ai-patent-claims' && currentUser && (
+            <div className="flex-1 -m-6">
+              <AIPatentClaimGenerator 
+                currentUser={currentUser} 
+                projectId={currentSpace?.id}
+              />
+            </div>
+          )}
+
+          {activeSection === 'prior-art-oracle' && currentUser && (
+            <div className="flex-1 -m-6">
+              <PriorArtOracle 
+                currentUser={currentUser} 
+                projectId={currentSpace?.id}
+              />
+            </div>
+          )}
+
+          {activeSection === 'trajectory-predictor' && currentUser && (
+            <div className="flex-1 -m-6">
+              <InnovationTrajectoryPredictor 
+                currentUser={currentUser} 
+                projectId={currentSpace?.id}
+              />
+            </div>
+          )}
+
+          {activeSection === 'ai-services-config' && currentUser && (
+            <div className="flex-1 -m-6">
+              <AIServicesConfig 
+                currentUser={currentUser} 
+              />
+            </div>
+          )}
+
+          {activeSection === 'support' && (
+            <div className="flex-1 -m-6">
+              <SupportPage initialSection={supportSection} />
             </div>
           )}
           

@@ -61,18 +61,12 @@ This guide will deploy your InnoSpot patent intelligence app with the new CMS da
 -- Copy/paste contents of: 009_showcase_tables_safe.sql
 ```
 
-#### **2d. Demo Users for Testing (Recommended)**
-```sql
--- RECOMMENDED: Copy/paste contents of: 010_create_demo_user.sql
--- This creates pre-verified demo users for testing (no email verification needed)
-```
-
 ### **Step 3: Get Supabase Credentials**
 
 1. **Go to**: Project Settings → **API**
 2. **Copy and save**:
-   - **Project URL**: `https://your-project.supabase.co`
-   - **Anon public key**: `eyJhbGciOiJIUzI1NiIs...`
+   - **Project URL**: `https://your-project.supabase.co`https://vwskeplrzaqnoiigysyu.supabase.co
+   - **Anon public key**: `eyJhbGciOiJIUzI1NiIs...`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3c2tlcGxyemFxbm9paWd5c3l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4NjMwNjEsImV4cCI6MjA3MDQzOTA2MX0.NPjq49dwIXtHvxFmHkoVyNvnsKQaNkESOxMTc_SiNvs
    - **Service role key**: `eyJhbGciOiJIUzI1NiIs...` (keep secret!)
 
 ### **Step 4: Configure Authentication**
@@ -80,7 +74,7 @@ This guide will deploy your InnoSpot patent intelligence app with the new CMS da
 1. **Go to**: Authentication → **Settings**
 2. **Site URL**: Set to your domain (e.g., `https://innospot.com`)
 3. **Redirect URLs**: Add your domain + `/auth/callback`
-4. **Email Settings**: Configure email provider (optional)
+4. **Email Settings**: Configure email provider (optional)eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3c2tlcGxyemFxbm9paWd5c3l1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDg2MzA2MSwiZXhwIjoyMDcwNDM5MDYxfQ.StzgoPKFeTHqLT28AB6dH4Ai0zTIwCbdjY6LKdV8fAM
 
 ### **Step 5: Add Sample Data (Optional)**
 

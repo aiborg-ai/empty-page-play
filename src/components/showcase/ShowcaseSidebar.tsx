@@ -1,4 +1,4 @@
-import { Store, Bot, Wrench, Database, FileText, BarChart3 } from 'lucide-react';
+import { Store, Bot, Wrench, Database, FileText, BarChart3, Plug2, Brain } from 'lucide-react';
 import { CapabilityCategory } from '../../types/capabilities';
 import { Project } from '../../types/cms';
 
@@ -14,6 +14,7 @@ const CATEGORIES = [
   { id: 'ai', label: 'AI Agents', icon: Bot },
   { id: 'analysis', label: 'Tools', icon: Wrench },
   { id: 'visualization', label: 'Datasets', icon: Database },
+  { id: 'mcp', label: 'MCP', icon: Plug2 },
   { id: 'search', label: 'Reports', icon: FileText },
   { id: 'automation', label: 'Dashboards', icon: BarChart3 }
 ] as const;

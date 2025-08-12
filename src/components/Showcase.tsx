@@ -1,6 +1,6 @@
 import { Store, Search, Filter, Loader2 } from 'lucide-react';
 import { CapabilityCategory } from '../types/capabilities';
-import { useProjectContext } from '../hooks/useProjectContext';
+import { useSpaceContext } from '../hooks/useSpaceContext';
 import { useShowcase } from '../hooks/useShowcase';
 import HarmonizedCard from './HarmonizedCard';
 import { ShowcaseSidebar } from './showcase/ShowcaseSidebar';
@@ -19,7 +19,7 @@ interface ShowcaseProps {
 }
 
 export default function Showcase({ initialCategory = 'all' }: ShowcaseProps) {
-  const { currentProject } = useProjectContext();
+  const { currentSpace: currentProject } = useSpaceContext();
   const {
     searchQuery,
     selectedCategory,

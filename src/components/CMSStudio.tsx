@@ -18,9 +18,15 @@ import {
   Activity,
   Globe,
   Lock,
-  Shield
+  Shield,
+  Sparkles,
+  ChevronDown,
+  Download,
+  Plug2,
+  X
 } from 'lucide-react';
 import { DashboardService } from '../lib/dashboardService';
+import { CapabilityDownloadService, DownloadsByCategory } from '../lib/capabilityDownloadService';
 import type { 
   Dashboard, 
   AIAgent, 
@@ -30,49 +36,78 @@ import type {
   CreateDashboardData
 } from '../types/cms';
 import { InstantUser } from '../lib/instantAuth';
+import AIDashboardModal from './modals/AIDashboardModal';
+import VoiceSearchButton from './VoiceSearchButton';
 
 interface CMSStudioProps {
   currentUser: InstantUser;
   projectId?: string;
 }
 
-type AssetType = 'dashboards' | 'ai_agents' | 'tools' | 'datasets' | 'reports';
+type AssetType = 'dashboards' | 'ai_agents' | 'tools' | 'datasets' | 'mcp' | 'reports' | 'downloaded';
 
 const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
   const [activeTab, setActiveTab] = useState<AssetType>('dashboards');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showAIDashboardModal, setShowAIDashboardModal] = useState(false);
+  const [showCreateDropdown, setShowCreateDropdown] = useState(false);
   
   // Asset data
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
   const [aiAgents, setAIAgents] = useState<AIAgent[]>([]);
   const [tools, setTools] = useState<Tool[]>([]);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [mcpIntegrations, setMcpIntegrations] = useState<any[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
+  const [downloadedCapabilities, setDownloadedCapabilities] = useState<DownloadsByCategory[]>([]);
   
   const dashboardService = DashboardService.getInstance();
+
+  const totalDownloadedCount = downloadedCapabilities.reduce((sum, category) => sum + category.downloadCount, 0);
 
   const assetTypes = [
     { id: 'dashboards', label: 'Dashboards', icon: Layout, count: dashboards.length },
     { id: 'ai_agents', label: 'AI Agents', icon: Bot, count: aiAgents.length },
     { id: 'tools', label: 'Tools', icon: Wrench, count: tools.length },
     { id: 'datasets', label: 'Datasets', icon: Database, count: datasets.length },
+    { id: 'mcp', label: 'MCP', icon: Plug2, count: mcpIntegrations.length },
     { id: 'reports', label: 'Reports', icon: FileText, count: reports.length },
+    { id: 'downloaded', label: 'Downloaded', icon: Download, count: totalDownloadedCount },
   ] as const;
 
   useEffect(() => {
     loadAssets();
   }, [activeTab, projectId]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.relative')) {
+        setShowCreateDropdown(false);
+      }
+    };
+
+    if (showCreateDropdown) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showCreateDropdown]);
+
   const loadAssets = async () => {
     setIsLoading(true);
     try {
       switch (activeTab) {
-        case 'dashboards':
+        case 'dashboards': {
           const { data: dashboardData } = await dashboardService.getUserDashboards();
           setDashboards(dashboardData || []);
           break;
+        }
         case 'ai_agents':
           // TODO: Implement AI agents service once tables are created
           setAIAgents([]);
@@ -85,10 +120,19 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
           // TODO: Implement datasets service once tables are created
           setDatasets([]);
           break;
+        case 'mcp':
+          // TODO: Implement MCP integrations service once tables are created
+          setMcpIntegrations([]);
+          break;
         case 'reports':
           // TODO: Implement reports service once tables are created
           setReports([]);
           break;
+        case 'downloaded': {
+          const downloadedData = await CapabilityDownloadService.getUserDownloadsByCategory();
+          setDownloadedCapabilities(downloadedData);
+          break;
+        }
       }
     } catch (error) {
       console.error('Error loading assets:', error);
@@ -103,7 +147,9 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
       case 'ai_agents': return aiAgents;
       case 'tools': return tools;
       case 'datasets': return datasets;
+      case 'mcp': return mcpIntegrations;
       case 'reports': return reports;
+      case 'downloaded': return []; // Downloaded capabilities have special rendering
       default: return [];
     }
   };
@@ -162,6 +208,10 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
           case 'datasets':
             // TODO: Implement datasets creation once service is available
             console.log('Datasets creation not yet implemented');
+            break;
+          case 'mcp':
+            // TODO: Implement MCP integrations creation once service is available
+            console.log('MCP integrations creation not yet implemented');
             break;
           case 'reports':
             // TODO: Implement reports creation once service is available
@@ -580,17 +630,78 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
                 placeholder="Search assets..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="pl-9 pr-20 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                    title="Clear search"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+                <VoiceSearchButton
+                  onTranscription={(text) => setSearchQuery(text)}
+                  onInterimTranscription={(text) => setSearchQuery(text)}
+                  className="!p-1.5"
+                  placeholder="Say the asset name you're looking for..."
+                />
+              </div>
             </div>
             
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Create New
-            </button>
+            {activeTab === 'dashboards' ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowCreateDropdown(!showCreateDropdown)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create New
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                
+                {showCreateDropdown && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10 border">
+                    <button
+                      onClick={() => {
+                        setShowCreateModal(true);
+                        setShowCreateDropdown(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <Layout className="w-4 h-4 text-gray-600" />
+                      <div>
+                        <div className="font-medium text-gray-900">Manual Dashboard</div>
+                        <div className="text-sm text-gray-500">Create from scratch</div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowAIDashboardModal(true);
+                        setShowCreateDropdown(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 border-t"
+                    >
+                      <Sparkles className="w-4 h-4 text-purple-600" />
+                      <div>
+                        <div className="font-medium text-gray-900">AI Dashboard</div>
+                        <div className="text-sm text-gray-500">Generate from uploaded data</div>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Create New
+              </button>
+            )}
           </div>
         </div>
 
@@ -642,14 +753,149 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
                 : `Get started by creating your first ${assetTypes.find(t => t.id === activeTab)?.label.toLowerCase().slice(0, -1)}.`
               }
             </p>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 mx-auto"
-            >
-              <Plus className="w-4 h-4" />
-              Create New {assetTypes.find(t => t.id === activeTab)?.label.slice(0, -1)}
-            </button>
+            {activeTab === 'dashboards' ? (
+              <div className="relative flex justify-center">
+                <button
+                  onClick={() => setShowCreateDropdown(!showCreateDropdown)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create New Dashboard
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                
+                {showCreateDropdown && (
+                  <div className="absolute top-full mt-2 w-56 bg-white rounded-md shadow-lg z-10 border">
+                    <button
+                      onClick={() => {
+                        setShowCreateModal(true);
+                        setShowCreateDropdown(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <Layout className="w-4 h-4 text-gray-600" />
+                      <div>
+                        <div className="font-medium text-gray-900">Manual Dashboard</div>
+                        <div className="text-sm text-gray-500">Create from scratch</div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowAIDashboardModal(true);
+                        setShowCreateDropdown(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 border-t"
+                    >
+                      <Sparkles className="w-4 h-4 text-purple-600" />
+                      <div>
+                        <div className="font-medium text-gray-900">AI Dashboard</div>
+                        <div className="text-sm text-gray-500">Generate from uploaded data</div>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 mx-auto"
+              >
+                <Plus className="w-4 h-4" />
+                Create New {assetTypes.find(t => t.id === activeTab)?.label.slice(0, -1)}
+              </button>
+            )}
           </div>
+        ) : activeTab === 'downloaded' ? (
+          // Special rendering for downloaded capabilities
+          downloadedCapabilities.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Download className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No Downloaded Capabilities
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Download capabilities from the Showcase to see them here.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {downloadedCapabilities.map((categoryGroup) => (
+                <div key={categoryGroup.category} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      {categoryGroup.category === 'analysis' && <Wrench className="w-5 h-5 text-blue-600" />}
+                      {categoryGroup.category === 'search' && <FileText className="w-5 h-5 text-orange-600" />}
+                      {categoryGroup.category === 'visualization' && <Database className="w-5 h-5 text-green-600" />}
+                      {categoryGroup.category === 'ai' && <Bot className="w-5 h-5 text-purple-600" />}
+                      {categoryGroup.category === 'automation' && <Activity className="w-5 h-5 text-indigo-600" />}
+                      {!['analysis', 'search', 'visualization', 'ai', 'automation'].includes(categoryGroup.category) && <Tag className="w-5 h-5 text-gray-600" />}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 capitalize">
+                        {categoryGroup.category === 'analysis' ? 'Tools' : 
+                         categoryGroup.category === 'search' ? 'Reports' : 
+                         categoryGroup.category === 'visualization' ? 'Datasets' : 
+                         categoryGroup.category === 'ai' ? 'AI Agents' : 
+                         categoryGroup.category === 'automation' ? 'Dashboards' : 
+                         categoryGroup.category}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {categoryGroup.downloadCount} capability{categoryGroup.downloadCount !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {categoryGroup.capabilities.map((capability) => (
+                      <div
+                        key={capability.id}
+                        className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h4 className="font-medium text-gray-900 text-sm">
+                            {capability.name}
+                          </h4>
+                          <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                            {capability.type}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-3">
+                          Downloaded {new Date(capability.downloadedAt).toLocaleDateString()}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <button
+                            onClick={() => {
+                              // TODO: Implement capability launch/open functionality
+                              console.log('Opening capability:', capability.id);
+                            }}
+                            className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors"
+                          >
+                            Open
+                          </button>
+                          <button
+                            onClick={async () => {
+                              // Remove from downloads
+                              const result = await CapabilityDownloadService.removeDownload(capability.id);
+                              if (result.success) {
+                                // Reload downloaded capabilities
+                                const updatedData = await CapabilityDownloadService.getUserDownloadsByCategory();
+                                setDownloadedCapabilities(updatedData);
+                              }
+                            }}
+                            className="text-xs text-red-600 hover:text-red-700 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredAssets.map((asset) => (
@@ -661,6 +907,21 @@ const CMSStudio: React.FC<CMSStudioProps> = ({ currentUser, projectId }) => {
 
       {/* Create Asset Modal */}
       {showCreateModal && <CreateAssetModal />}
+      
+      {/* AI Dashboard Modal */}
+      {showAIDashboardModal && (
+        <AIDashboardModal
+          isOpen={showAIDashboardModal}
+          onClose={() => setShowAIDashboardModal(false)}
+          onDashboardCreated={(dashboardId) => {
+            setShowAIDashboardModal(false);
+            loadAssets(); // Refresh the dashboard list
+            // Optional: Navigate to the new dashboard or show success message
+            console.log('AI Dashboard created with ID:', dashboardId);
+          }}
+          currentUser={currentUser}
+        />
+      )}
     </div>
   );
 };
