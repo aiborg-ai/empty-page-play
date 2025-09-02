@@ -11,21 +11,18 @@ import {
   InnovationWhiteSpace,
   TechnologyCollision,
   TechnologySunset,
-  TimeMachineState,
-  LitigationScenario,
   InventorReputation,
-  QuantumSearchResult,
-  InnovationApiResponse
+  QuantumSearchResult
 } from '../types/innovationIntelligence';
 
 class InnovationIntelligenceService {
   private static instance: InnovationIntelligenceService;
-  private apiEndpoint: string;
+  // private apiEndpoint: string; // Unused - for future API integration
   private cacheEnabled: boolean = true;
   private cache: Map<string, any> = new Map();
 
   private constructor() {
-    this.apiEndpoint = import.meta.env.VITE_INNOVATION_API_URL || '/api/innovation';
+    // this.apiEndpoint = import.meta.env.VITE_INNOVATION_API_URL || '/api/innovation'; // Unused - for future API integration
   }
 
   static getInstance(): InnovationIntelligenceService {
@@ -308,7 +305,7 @@ class InnovationIntelligenceService {
     return `${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private generateGeneticSequence(domain: string): string {
+  private generateGeneticSequence(_domain: string): string {
     const bases = ['A', 'T', 'G', 'C'];
     let sequence = '';
     for (let i = 0; i < 100; i++) {
@@ -482,7 +479,7 @@ class InnovationIntelligenceService {
     return phases[Math.floor(Math.random() * phases.length)];
   }
 
-  private async detectDeclineSignals(domain: string) {
+  private async detectDeclineSignals(_domain: string) {
     return [
       {
         type: 'filing_decrease' as const,
@@ -508,7 +505,7 @@ class InnovationIntelligenceService {
     ];
   }
 
-  private generateTransitionStrategy(domain: string) {
+  private generateTransitionStrategy(_domain: string) {
     return {
       recommended_actions: [
         'Assess current portfolio',
@@ -558,7 +555,7 @@ class InnovationIntelligenceService {
     ];
   }
 
-  private async findQuantumConnections(query: string, patents: string[]) {
+  private async findQuantumConnections(_query: string, patents: string[]) {
     return patents.slice(1, 6).map(patent => ({
       target_patent: patent,
       connection_type: 'analogical' as const,
@@ -593,7 +590,7 @@ class InnovationIntelligenceService {
   }
 
   private calculateInnovationVectors(patents: string[]) {
-    return patents.slice(0, 5).map(patent => ({
+    return patents.slice(0, 5).map(_patent => ({
       vector_id: this.generateId(),
       direction: [
         Math.random() * 2 - 1,
@@ -619,7 +616,7 @@ class InnovationIntelligenceService {
     return results.flat();
   }
 
-  private async generateRecommendations(insights: any[], query: InnovationQuery): Promise<string[]> {
+  private async generateRecommendations(_insights: any[], _query: InnovationQuery): Promise<string[]> {
     // AI-powered recommendation generation based on insights
     return [
       'Focus on high-opportunity white spaces identified in the analysis',
@@ -629,7 +626,7 @@ class InnovationIntelligenceService {
     ];
   }
 
-  private calculateConfidenceScore(insights: any[]): number {
+  private calculateConfidenceScore(_insights: any[]): number {
     // Calculate overall confidence based on data quality and consistency
     return Math.random() * 40 + 60; // 60-100% confidence range
   }

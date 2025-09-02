@@ -2,7 +2,7 @@
  * Error Boundary for SearchFilterBar and related components
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { SearchFilterError } from '../../types/searchFilter';
 import { AlertTriangle, RefreshCw, HelpCircle } from 'lucide-react';
 

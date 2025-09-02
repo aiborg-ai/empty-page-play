@@ -9,9 +9,7 @@ import {
   AlertRule,
   MonitoringService,
   AlertType,
-  AlertSeverity,
-  WatchlistFilters,
-  AlertSettings
+  AlertSeverity
 } from '../types/patentMonitoring';
 
 class PatentMonitoringServiceImpl implements MonitoringService {
@@ -454,13 +452,13 @@ class PatentMonitoringServiceImpl implements MonitoringService {
     this.competitors = this.competitors.filter(c => c.id !== id);
   }
 
-  async getCompetitors(userId: string): Promise<CompetitorProfile[]> {
+  async getCompetitors(_userId: string): Promise<CompetitorProfile[]> {
     await this.simulateDelay(100);
     return [...this.competitors];
   }
 
   // Technology trends
-  async getTechnologyTrends(filters?: any): Promise<TechnologyTrend[]> {
+  async getTechnologyTrends(_filters?: any): Promise<TechnologyTrend[]> {
     await this.simulateDelay(300);
     
     // Mock technology trends data

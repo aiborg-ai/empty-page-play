@@ -58,9 +58,9 @@ interface CollisionAnalysisProps {
 }
 
 // Technology Particle Component
-function TechnologyParticle({ particle, color, isColliding, trailEnabled }: TechnologyParticleProps) {
+function TechnologyParticle({ particle, color, isColliding, trailEnabled: _trailEnabled }: TechnologyParticleProps) {
   const meshRef = useRef<THREE.Mesh>(null);
-  useFrame((_, delta) => {
+  useFrame((state, _delta) => {
     if (meshRef.current) {
       // Update position
       meshRef.current.position.set(...particle.position);
@@ -746,7 +746,19 @@ export default function InventionCollisionPredictor({ onNavigate }: InventionCol
         categories={categories}
         sortOptions={sortOptions}
         showVoiceSearch={true}
-        {...filterState}
+        searchQuery={filterState.searchQuery}
+        selectedCategory={filterState.selectedCategory}
+        selectedSort={filterState.selectedSort}
+        activeFilters={filterState.activeFilters}
+        isExpanded={filterState.isExpanded}
+        activeFilterCount={filterState.activeFilterCount}
+        setSearchQuery={filterState.setSearchQuery}
+        setSelectedCategory={filterState.setSelectedCategory}
+        setSelectedSort={filterState.setSelectedSort}
+        setActiveFilter={filterState.setActiveFilter}
+        toggleQuickFilter={filterState.toggleQuickFilter}
+        clearAllFilters={filterState.clearAllFilters}
+        setExpanded={filterState.setExpanded}
       />
 
       {/* Analysis Input */}

@@ -36,7 +36,7 @@ interface AccessibleDropdownProps {
 }
 
 function AccessibleDropdown({ 
-  id, 
+  id: _id, 
   label, 
   value, 
   options, 
@@ -139,7 +139,7 @@ function AccessibleDropdown({
           aria-labelledby={comboboxId}
           className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
         >
-          {options.map((option, index) => (
+          {options.map((option, _index) => (
             <li
               key={option.value}
               role="option"
@@ -268,7 +268,7 @@ function SearchFilterBarComponent({
 
           {/* Voice Search */}
           {showVoiceSearch && (
-            <VoiceSearchButton onTranscript={setSearchQuery} />
+            <VoiceSearchButton onTranscription={setSearchQuery} />
           )}
 
           {/* Category Selector */}
@@ -357,7 +357,7 @@ function SearchFilterBarComponent({
               <div className="flex flex-wrap gap-2" role="group" aria-label="Quick filter options">
                 {quickFilters.map(quickFilter => {
                   const Icon = quickFilter.icon;
-                  const isActive = activeFilters[quickFilter.id];
+                  const isActive = !!activeFilters[quickFilter.id];
                   
                   return (
                     <button
@@ -372,7 +372,7 @@ function SearchFilterBarComponent({
                       aria-pressed={isActive}
                       aria-label={`${isActive ? 'Remove' : 'Add'} ${quickFilter.label} filter`}
                     >
-                      {Icon && <Icon className="inline h-3 w-3 mr-1" />}
+                      {Icon && React.createElement(Icon as any, { className: "inline h-3 w-3 mr-1" })}
                       {quickFilter.label}
                     </button>
                   );
@@ -396,7 +396,7 @@ function SearchFilterBarComponent({
                     {filter.type === 'select' && filter.options && (
                       <select
                         id={`filter-${filter.id}`}
-                        value={activeFilters[filter.id] || ''}
+                        value={String(activeFilters[filter.id] || '')}
                         onChange={(e) => setActiveFilter(filter.id, e.target.value)}
                         className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         aria-describedby={filter.placeholder ? `filter-${filter.id}-help` : undefined}
@@ -419,12 +419,12 @@ function SearchFilterBarComponent({
                             <label key={option.value} className="flex items-center text-sm cursor-pointer">
                               <input
                                 type="checkbox"
-                                checked={Array.isArray(activeFilters[filter.id]) && activeFilters[filter.id].includes(option.value)}
+                                checked={Array.isArray(activeFilters[filter.id]) && (activeFilters[filter.id] as any[]).includes(option.value)}
                                 onChange={(e) => {
-                                  const current = Array.isArray(activeFilters[filter.id]) ? activeFilters[filter.id] : [];
+                                  const current = Array.isArray(activeFilters[filter.id]) ? (activeFilters[filter.id] as any[]) : [];
                                   const newValue = e.target.checked
                                     ? [...current, option.value]
-                                    : current.filter((v: string) => v !== option.value);
+                                    : (current as any[]).filter((v: string) => v !== option.value);
                                   setActiveFilter(filter.id, newValue.length > 0 ? newValue : null);
                                 }}
                                 className="mr-2 rounded text-blue-600 focus:ring-2 focus:ring-blue-500"

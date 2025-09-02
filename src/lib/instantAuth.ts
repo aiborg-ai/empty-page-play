@@ -1,15 +1,44 @@
-// INSTANT AUTH SOLUTION - Works 100% of the time
-// This creates demo users that bypass ALL Supabase restrictions
+/**
+ * ============================================================================
+ * InstantAuth - Seamless Demo Authentication System
+ * ============================================================================
+ * 
+ * Provides instant access to demo users without email/SMS verification.
+ * Bypasses all Supabase restrictions for seamless demonstration experience.
+ * 
+ * Features:
+ * - Instant login without verification
+ * - Demo user management
+ * - Session persistence
+ * - Fallback to production auth
+ * 
+ * @author InnoSpot Development Team
+ * @version 1.0.0
+ * @since 2024
+ */
 
 import { supabase } from './supabase';
 
+/**
+ * Interface defining the structure of an InstantAuth user
+ * Provides all necessary user information for the application
+ * 
+ * @interface InstantUser
+ */
 export interface InstantUser {
+  /** Unique user identifier */
   id: string;
+  /** User's email address (used as username) */
   email: string;
+  /** User's first name */
   firstName: string;
+  /** User's last name */
   lastName: string;
+  /** Full display name for UI presentation */
   displayName: string;
+  /** Account type (trial, professional, enterprise) */
   accountType: string;
+  /** Flag indicating if this is a demo user */
   isDemo: boolean;
 }
 

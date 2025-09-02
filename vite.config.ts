@@ -6,8 +6,8 @@ import path from 'path'
 export default defineConfig(() => ({
   plugins: [react()],
   server: {
-    host: 'localhost',  // Explicitly use localhost
-    port: 5173,
+    host: '0.0.0.0',  // Listen on all interfaces
+    port: 8080,
     strictPort: false,
     open: false,
     cors: true

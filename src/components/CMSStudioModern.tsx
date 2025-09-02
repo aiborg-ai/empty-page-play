@@ -63,6 +63,7 @@ const ASSET_CATEGORIES = {
 
 const CMSStudioModern: React.FC<CMSStudioModernProps> = ({ currentUser, projectId }) => {
   const [activeCategory, setActiveCategory] = useState<AssetType>('all');
+  const [selectedType, setSelectedType] = useState<AssetType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [, setShowCreateModal] = useState(false);
@@ -293,8 +294,8 @@ const CMSStudioModern: React.FC<CMSStudioModernProps> = ({ currentUser, projectI
         {/* Search and Filter Bar */}
         <SearchFilterBar
           placeholder="Search assets by name, type, or tags..."
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
           categories={[
             { value: 'all', label: 'All Assets', count: assetCounts.all },
             { value: 'dashboards', label: 'Dashboards', count: assetCounts.dashboards },
@@ -306,13 +307,23 @@ const CMSStudioModern: React.FC<CMSStudioModernProps> = ({ currentUser, projectI
             { value: 'downloaded', label: 'Downloaded', count: assetCounts.downloaded }
           ]}
           selectedCategory={selectedType}
-          onCategoryChange={(value) => setSelectedType(value as AssetType)}
+          setSelectedCategory={(value) => setSelectedType(value as AssetType)}
           sortOptions={[
             { value: 'recent', label: 'Most Recent' },
             { value: 'name', label: 'Name (A-Z)' },
             { value: 'updated', label: 'Last Updated' }
           ]}
           className="mb-6"
+          // Additional required props
+          selectedSort="recent"
+          setSelectedSort={() => {}}
+          activeFilters={{}}
+          isExpanded={false}
+          activeFilterCount={0}
+          setActiveFilter={() => {}}
+          toggleQuickFilter={() => {}}
+          clearAllFilters={() => {}}
+          setExpanded={() => {}}
         />
 
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">

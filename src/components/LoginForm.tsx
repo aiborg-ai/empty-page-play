@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { InstantAuthService } from '../lib/instantAuth';
-import { User, Eye, EyeOff, LogIn } from 'lucide-react';
+import { startLiveDemo } from '../lib/liveDemoService';
+import { User, Eye, EyeOff, LogIn, Sparkles, Zap } from 'lucide-react';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -11,6 +12,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   const [password, setPassword] = useState('demo123456');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDemoStarting, setIsDemoStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const demoCredentials = InstantAuthService.getDemoCredentials();
 
@@ -44,6 +46,29 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     setPassword(demoPassword);
   };
 
+  const handleStartLiveDemo = async () => {
+    setIsDemoStarting(true);
+    setError(null);
+    
+    try {
+      console.log('🚀 Starting Live Demo Session');
+      const session = startLiveDemo();
+      
+      // Small delay for UX
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log('✅ Live Demo Started:', session);
+      
+      // Trigger success callback to navigate to dashboard
+      onSuccess?.();
+    } catch (err) {
+      console.error('❌ Failed to start demo:', err);
+      setError('Failed to start demo - please try again');
+    } finally {
+      setIsDemoStarting(false);
+    }
+  };
+
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm border border-gray-200">
@@ -53,6 +78,40 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             <LogIn className="w-5 h-5 text-blue-600" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900">Sign In</h2>
+        </div>
+
+        {/* Live Demo Button - Most Prominent */}
+        <div className="mb-6">
+          <button
+            onClick={handleStartLiveDemo}
+            disabled={isDemoStarting}
+            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed group"
+          >
+            {isDemoStarting ? (
+              <span className="flex items-center justify-center gap-3">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Starting Live Demo...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-3">
+                <Zap className="w-6 h-6" />
+                Try Live Demo - No Login Required
+                <Sparkles className="w-5 h-5 animate-pulse" />
+              </span>
+            )}
+          </button>
+          <p className="text-xs text-center text-gray-600 mt-2">
+            🚀 Instant access • No signup • Full features for 24 hours
+          </p>
+        </div>
+
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Or sign in with account</span>
+          </div>
         </div>
 
         {/* Demo Accounts */}

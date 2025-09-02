@@ -1,4 +1,4 @@
-import { Store, Bot, Wrench, Database, FileText, BarChart3, Plug2, Brain } from 'lucide-react';
+import { Store, Bot, Wrench, Database, FileText, BarChart3, Plug2 } from 'lucide-react';
 import { CapabilityCategory } from '../../types/capabilities';
 import { Project } from '../../types/cms';
 

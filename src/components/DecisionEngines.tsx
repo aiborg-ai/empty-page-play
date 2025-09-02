@@ -149,8 +149,8 @@ export default function DecisionEngines({ currentUser, onNavigate }: DecisionEng
         {/* Search and Filter Bar */}
         <SearchFilterBar
           placeholder="Search decision engines by name, purpose, or category..."
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
           categories={[
             { value: 'all', label: 'All Engines', count: filteredEngines.length },
             ...ENGINE_CATEGORIES.map(cat => ({
@@ -160,13 +160,22 @@ export default function DecisionEngines({ currentUser, onNavigate }: DecisionEng
             }))
           ]}
           selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+          setSelectedCategory={setSelectedCategory}
           sortOptions={[
             { value: 'recent', label: 'Most Recent' },
             { value: 'popular', label: 'Most Used' },
             { value: 'duration', label: 'Shortest Duration' },
             { value: 'alpha', label: 'Alphabetical' }
           ]}
+          selectedSort="recent"
+          setSelectedSort={() => {}}
+          activeFilters={{}}
+          setActiveFilter={() => {}}
+          toggleQuickFilter={() => {}}
+          clearAllFilters={() => {}}
+          setExpanded={() => {}}
+          isExpanded={false}
+          activeFilterCount={0}
           className="mb-6"
         />
 

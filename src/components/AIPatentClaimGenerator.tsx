@@ -73,10 +73,10 @@ const AIPatentClaimGenerator: React.FC<AIPatentClaimGeneratorProps> = ({
   const [claimStrategy, setClaimStrategy] = useState<'defensive' | 'offensive' | 'balanced'>('balanced');
   const [claimComplexity, setClaimComplexity] = useState<'simple' | 'moderate' | 'complex'>('moderate');
   const [isGenerating, setIsGenerating] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const [_generatedClaimSets, setGeneratedClaimSets] = useState<ClaimSet[]>([]);
   const [activeClaimSet, setActiveClaimSet] = useState<ClaimSet | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const [_editingClaim, _setEditingClaim] = useState<PatentClaim | null>(null);
   const [error, setError] = useState<string>('');
   const [generationProgress, setGenerationProgress] = useState(0);

@@ -34,7 +34,8 @@ const INNOVATION_FEATURES = [
     icon: Sparkles,
     color: 'purple',
     status: 'available',
-    stats: { usage: 1247, success: 96 }
+    stats: { usage: 1247, success: 96 },
+    tags: ['ai']
   },
   {
     id: 'collision-detection',
@@ -43,7 +44,8 @@ const INNOVATION_FEATURES = [
     icon: Shield,
     color: 'red',
     status: 'available',
-    stats: { alerts: 23, prevented: 8 }
+    stats: { alerts: 23, prevented: 8 },
+    tags: ['monitoring']
   },
   {
     id: 'citation-3d',
@@ -52,7 +54,8 @@ const INNOVATION_FEATURES = [
     icon: Network,
     color: 'blue',
     status: 'available',
-    stats: { networks: 45, nodes: 1200 }
+    stats: { networks: 45, nodes: 1200 },
+    tags: ['visualization']
   },
   {
     id: 'blockchain-provenance',
@@ -61,7 +64,8 @@ const INNOVATION_FEATURES = [
     icon: Link,
     color: 'indigo',
     status: 'available',
-    stats: { records: 567, verified: 100 }
+    stats: { records: 567, verified: 100 },
+    tags: ['analytics']
   },
   {
     id: 'portfolio-optimization',
@@ -70,7 +74,8 @@ const INNOVATION_FEATURES = [
     icon: TrendingUp,
     color: 'green',
     status: 'available',
-    stats: { saved: 125000, optimized: 89 }
+    stats: { saved: 125000, optimized: 89 },
+    tags: ['ai', 'analytics']
   },
   {
     id: 'collaborative-review',
@@ -79,7 +84,8 @@ const INNOVATION_FEATURES = [
     icon: Users,
     color: 'orange',
     status: 'available',
-    stats: { reviews: 234, teams: 15 }
+    stats: { reviews: 234, teams: 15 },
+    tags: ['collaboration']
   },
   {
     id: 'market-intelligence',
@@ -88,7 +94,8 @@ const INNOVATION_FEATURES = [
     icon: BarChart3,
     color: 'cyan',
     status: 'available',
-    stats: { insights: 890, opportunities: 67 }
+    stats: { insights: 890, opportunities: 67 },
+    tags: ['analytics']
   },
   {
     id: 'landscape-monitoring',
@@ -97,7 +104,8 @@ const INNOVATION_FEATURES = [
     icon: Bell,
     color: 'yellow',
     status: 'available',
-    stats: { monitors: 12, alerts: 45 }
+    stats: { monitors: 12, alerts: 45 },
+    tags: ['monitoring']
   },
   {
     id: 'licensing-marketplace',
@@ -106,7 +114,8 @@ const INNOVATION_FEATURES = [
     icon: Store,
     color: 'pink',
     status: 'available',
-    stats: { deals: 34, revenue: 450000 }
+    stats: { deals: 34, revenue: 450000 },
+    tags: ['marketplace']
   },
   {
     id: 'voice-assistant',
@@ -115,7 +124,8 @@ const INNOVATION_FEATURES = [
     icon: Mic,
     color: 'teal',
     status: 'available',
-    stats: { commands: 1567, accuracy: 94 }
+    stats: { commands: 1567, accuracy: 94 },
+    tags: ['ai']
   }
 ];
 
@@ -263,8 +273,8 @@ export default function InnovationHub({ currentUser, projectId: _projectId, onNa
         {/* Search and Filter Bar */}
         <SearchFilterBar
           placeholder="Search innovation features by name, category, or description..."
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
           categories={[
             { value: 'all', label: 'All Features', count: filteredFeatures.length },
             { value: 'ai', label: 'AI Features', count: INNOVATION_FEATURES.filter(f => f.tags?.includes('ai')).length },
@@ -272,12 +282,21 @@ export default function InnovationHub({ currentUser, projectId: _projectId, onNa
             { value: 'visualization', label: 'Visualization', count: INNOVATION_FEATURES.filter(f => f.tags?.includes('visualization')).length }
           ]}
           selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+          setSelectedCategory={setSelectedCategory}
           sortOptions={[
             { value: 'recent', label: 'Most Recent' },
             { value: 'popular', label: 'Most Popular' },
             { value: 'alpha', label: 'Alphabetical' }
           ]}
+          selectedSort="recent"
+          setSelectedSort={() => {}}
+          activeFilters={{}}
+          setActiveFilter={() => {}}
+          toggleQuickFilter={() => {}}
+          clearAllFilters={() => {}}
+          setExpanded={() => {}}
+          isExpanded={false}
+          activeFilterCount={0}
           className="mb-6"
         />
 

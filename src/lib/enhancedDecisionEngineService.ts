@@ -81,7 +81,7 @@ export class EnhancedDecisionEngineService {
       metadata: {
         aiModel: 'gpt-4',
         temperature: 0.7,
-        systemPrompt: this.AI_PROMPTS[engineId]?.system || ''
+        systemPrompt: this.AI_PROMPTS[engineId as keyof typeof this.AI_PROMPTS]?.system || ''
       }
     };
     
@@ -99,8 +99,8 @@ export class EnhancedDecisionEngineService {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     const session = this.getSession(sessionId);
-    const enginePrompts = this.AI_PROMPTS[session.engineId as keyof typeof this.AI_PROMPTS];
-    const stepPrompt = enginePrompts?.steps[stepIndex as keyof typeof enginePrompts.steps] || '';
+    // const enginePrompts = this.AI_PROMPTS[session.engineId as keyof typeof this.AI_PROMPTS]; // Unused - for future AI integration
+    // const _stepPrompt = enginePrompts?.steps[stepIndex as keyof typeof enginePrompts.steps] || ''; // Unused - for future AI integration
     
     // Generate mock AI response based on step
     const mockResponses: Record<number, any> = {
@@ -200,7 +200,7 @@ export class EnhancedDecisionEngineService {
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     const session = this.getSession(sessionId);
-    const systemPrompt = this.AI_PROMPTS[session.engineId as keyof typeof this.AI_PROMPTS]?.system || '';
+    // const _systemPrompt = this.AI_PROMPTS[session.engineId as keyof typeof this.AI_PROMPTS]?.system || ''; // Unused - for future AI integration
     
     // Generate comprehensive recommendation
     const recommendation = {

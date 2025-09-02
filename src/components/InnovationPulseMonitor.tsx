@@ -559,7 +559,19 @@ export default function InnovationPulseMonitor({ onNavigate }: InnovationPulseMo
         categories={categories}
         sortOptions={sortOptions}
         showVoiceSearch={true}
-        {...filterState}
+        searchQuery={filterState.searchQuery}
+        selectedCategory={filterState.selectedCategory}
+        selectedSort={filterState.selectedSort}
+        activeFilters={filterState.activeFilters}
+        isExpanded={filterState.isExpanded}
+        activeFilterCount={filterState.activeFilterCount}
+        setSearchQuery={filterState.setSearchQuery}
+        setSelectedCategory={filterState.setSelectedCategory}
+        setSelectedSort={filterState.setSelectedSort}
+        setActiveFilter={filterState.setActiveFilter}
+        toggleQuickFilter={filterState.toggleQuickFilter}
+        clearAllFilters={filterState.clearAllFilters}
+        setExpanded={filterState.setExpanded}
       />
 
       {/* Global Metrics Dashboard */}

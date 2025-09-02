@@ -27,7 +27,7 @@ interface AssetUploadModalProps {
 const AssetUploadModal: React.FC<AssetUploadModalProps> = ({
   onClose,
   onUpload,
-  currentUser
+  currentUser: _currentUser
 }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [assetType, setAssetType] = useState<AssetType>('document');

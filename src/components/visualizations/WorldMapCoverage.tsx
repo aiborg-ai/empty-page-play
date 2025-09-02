@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Globe, TrendingUp } from 'lucide-react';
+import { MapPin, Globe } from 'lucide-react';
 
 interface WorldMapCoverageProps {
   data: Record<string, any>;

@@ -4,28 +4,21 @@ import {
   Search,
   Plus,
   Eye,
-  EyeOff,
   TrendingUp,
   TrendingDown,
   Minus,
   AlertTriangle,
   CheckCircle,
-  Clock,
-  Filter,
   Settings,
   Users,
   Target,
-  BarChart3,
   Activity,
-  Mail,
-  Smartphone,
   Globe,
   FileText,
   Calendar,
-  Zap,
-  X
+  Zap
 } from 'lucide-react';
-import { PatentAlert, Watchlist, MonitoringDashboard, AlertSeverity, AlertType } from '../types/patentMonitoring';
+import { MonitoringDashboard, AlertSeverity, AlertType } from '../types/patentMonitoring';
 import { patentMonitoringService } from '../lib/patentMonitoringService';
 import HelpIcon from './utils/HelpIcon';
 
@@ -41,7 +34,7 @@ const PatentMonitoring: React.FC<PatentMonitoringProps> = ({ currentUser, onNavi
   const [selectedAlertType, setSelectedAlertType] = useState<AlertType | 'all'>('all');
   const [selectedSeverity, setSelectedSeverity] = useState<AlertSeverity | 'all'>('all');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
-  const [showCreateWatchlist, setShowCreateWatchlist] = useState(false);
+  const [_showCreateWatchlist, _setShowCreateWatchlist] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -175,7 +168,7 @@ const PatentMonitoring: React.FC<PatentMonitoringProps> = ({ currentUser, onNavi
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setShowCreateWatchlist(true)}
+                onClick={() => _setShowCreateWatchlist(true)}
                 className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
@@ -406,7 +399,7 @@ const PatentMonitoring: React.FC<PatentMonitoringProps> = ({ currentUser, onNavi
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">Your Watchlists</h2>
                 <button
-                  onClick={() => setShowCreateWatchlist(true)}
+                  onClick={() => _setShowCreateWatchlist(true)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />

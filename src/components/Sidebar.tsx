@@ -33,7 +33,9 @@ import {
   Dna,
   Globe,
   Map,
-  Compass
+  Compass,
+  Lightbulb,
+  Link
 } from 'lucide-react';
 import { AuthService } from '../lib/authService';
 import { SpaceContextService } from '../lib/spaceContext';
@@ -75,13 +77,17 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
     { icon: Home, label: 'Home', id: 'dashboard' },
     { icon: Store, label: 'Showcase', id: 'showcase' },
     { icon: Briefcase, label: 'Studio', id: 'studio' },
+    { icon: Eye, label: 'Visual Explorer', id: 'visual-patent-explorer', isSpecial: true, isNew: true },
     { icon: Sparkles, label: 'Innovation Hub', id: 'innovation-hub', isSpecial: true },
+    { icon: Lightbulb, label: 'Innovation Manager', id: 'innovation-manager', isSpecial: true, isNew: true },
     { icon: Brain, label: 'Decision Engines', id: 'decision-engines', isSpecial: true },
     { icon: Activity, label: 'Patent Monitoring', id: 'patent-monitoring', isSpecial: true },
     { icon: DollarSign, label: 'Patent Valuation', id: 'patent-valuation', isSpecial: true },
     { icon: Shield, label: 'Competitive Intel', id: 'competitive-intelligence', isSpecial: true },
+    { icon: Zap, label: 'Automation', id: 'automation', isSpecial: true, isNew: true },
     { icon: FileText, label: 'Reports', id: 'reports' },
-    { icon: Users, label: 'Collab Hub', id: 'network' }
+    { icon: Users, label: 'Collab Hub', id: 'network' },
+    { icon: Link, label: 'Integrations', id: 'integrations', isSpecial: true, isNew: true }
   ];
 
   // Main menu items - bottom section
@@ -102,6 +108,7 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
       { icon: Zap, label: 'AI Agents', id: 'ai-agents' },
       { icon: Wrench, label: 'Tools', id: 'tools' },
       { icon: Search, label: 'Search', id: 'search' },
+      { icon: TrendingUp, label: 'Analytics', id: 'analytics' },
       { icon: Database, label: 'Datasets', id: 'datasets' },
       { icon: BarChart3, label: 'Dashboard', id: 'dashboards' },
       { icon: FileText, label: 'Reports', id: 'studio-reports' }
@@ -139,7 +146,8 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
       { icon: Settings, label: 'Account Settings', id: 'account-settings' },
       { icon: Bot, label: 'AI Settings', id: 'ai-settings-menu' },
       { icon: Bell, label: 'Notifications', id: 'notification-settings' },
-      { icon: Database, label: 'Data & Privacy', id: 'data-privacy' }
+      { icon: Database, label: 'Data & Privacy', id: 'data-privacy' },
+      { icon: Database, label: 'Database Test', id: 'database-test', isSpecial: true }
     ]
   };
 
@@ -149,7 +157,7 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
       return;
     }
     
-    if (menuId === 'showcase' || menuId === 'dashboard' || menuId === 'cms-admin' || menuId === 'innovation-hub' || menuId === 'reports' || menuId === 'decision-engines' || menuId === 'patent-monitoring' || menuId === 'patent-valuation' || menuId === 'competitive-intelligence') {
+    if (menuId === 'showcase' || menuId === 'dashboard' || menuId === 'cms-admin' || menuId === 'innovation-hub' || menuId === 'reports' || menuId === 'decision-engines' || menuId === 'patent-monitoring' || menuId === 'patent-valuation' || menuId === 'competitive-intelligence' || menuId === 'visual-patent-explorer') {
       setActiveMainMenu(null);
       onNavigate?.(menuId);
       return;
@@ -171,7 +179,7 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
     onNavigate?.(itemId);
   };
 
-  const MenuItem = ({ icon: Icon, label, isActive, onClick, isSpecial = false }: any) => (
+  const MenuItem = ({ icon: Icon, label, isActive, onClick, isSpecial = false, isNew = false }: any) => (
     <div 
       onClick={onClick}
       className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors ${
@@ -180,6 +188,11 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
     >
       <Icon className="w-4 h-4 flex-shrink-0" />
       <span className="text-sm font-medium">{label}</span>
+      {isNew && (
+        <span className="ml-auto px-1.5 py-0.5 text-xs font-bold bg-green-500 text-white rounded">
+          NEW
+        </span>
+      )}
     </div>
   );
 
@@ -212,8 +225,9 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
                 key={item.id}
                 icon={item.icon}
                 label={item.label}
-                isActive={activeMainMenu === item.id || (item.id === 'showcase' && activeSection === 'showcase') || (item.id === 'dashboard' && activeSection === 'dashboard') || (item.id === 'cms-admin' && activeSection === 'cms-admin')}
+                isActive={activeMainMenu === item.id || (item.id === 'showcase' && activeSection === 'showcase') || (item.id === 'dashboard' && activeSection === 'dashboard') || (item.id === 'cms-admin' && activeSection === 'cms-admin') || (item.id === 'visual-patent-explorer' && activeSection === 'visual-patent-explorer')}
                 isSpecial={item.isSpecial}
+                isNew={item.isNew}
                 onClick={() => handleMainMenuClick(item.id)}
               />
             ))}
@@ -229,7 +243,7 @@ export default function Sidebar({ activeSection, onNavigate, onToggleAIChat }: S
                 key={item.id}
                 icon={item.icon}
                 label={item.label}
-                isActive={activeMainMenu === item.id || (item.id === 'showcase' && activeSection === 'showcase') || (item.id === 'dashboard' && activeSection === 'dashboard') || (item.id === 'cms-admin' && activeSection === 'cms-admin')}
+                isActive={activeMainMenu === item.id || (item.id === 'showcase' && activeSection === 'showcase') || (item.id === 'dashboard' && activeSection === 'dashboard') || (item.id === 'cms-admin' && activeSection === 'cms-admin') || (item.id === 'visual-patent-explorer' && activeSection === 'visual-patent-explorer')}
                 isSpecial={false}
                 onClick={() => handleMainMenuClick(item.id)}
               />

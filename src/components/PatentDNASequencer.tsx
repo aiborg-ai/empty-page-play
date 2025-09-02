@@ -101,7 +101,7 @@ function DNAHelix({ dnaData, isAnimating, selectedBase, onBaseSelect }: DNAHelix
       />
 
       {/* DNA Bases */}
-      {dnaData.helix_structure.map((node, index) => (
+      {dnaData.helix_structure.map((node, _index) => (
         <group key={node.patent_id} position={node.position}>
           {/* Base Sphere */}
           <Sphere
@@ -199,7 +199,7 @@ function DNAHelix({ dnaData, isAnimating, selectedBase, onBaseSelect }: DNAHelix
 function MutationVisualizer({ mutations, position }: MutationVisualizerProps) {
   const groupRef = useRef<THREE.Group>(null);
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     if (groupRef.current) {
       groupRef.current.rotation.x += delta * 0.3;
       groupRef.current.rotation.z += delta * 0.2;
@@ -218,7 +218,7 @@ function MutationVisualizer({ mutations, position }: MutationVisualizerProps) {
 
   return (
     <group ref={groupRef} position={position}>
-      {mutations.map((mutation, index) => (
+      {mutations.map((mutation, _index) => (
         <group key={mutation.id}>
           {/* Mutation Core */}
           <Sphere args={[1.2]}>
@@ -452,7 +452,19 @@ export default function PatentDNASequencer({ onNavigate }: PatentDNASequencerPro
         categories={categories}
         sortOptions={sortOptions}
         showVoiceSearch={true}
-        {...filterState}
+        searchQuery={filterState.searchQuery}
+        selectedCategory={filterState.selectedCategory}
+        selectedSort={filterState.selectedSort}
+        activeFilters={filterState.activeFilters}
+        isExpanded={filterState.isExpanded}
+        activeFilterCount={filterState.activeFilterCount}
+        setSearchQuery={filterState.setSearchQuery}
+        setSelectedCategory={filterState.setSelectedCategory}
+        setSelectedSort={filterState.setSelectedSort}
+        setActiveFilter={filterState.setActiveFilter}
+        toggleQuickFilter={filterState.toggleQuickFilter}
+        clearAllFilters={filterState.clearAllFilters}
+        setExpanded={filterState.setExpanded}
       />
 
       {/* Analysis Input */}
@@ -636,7 +648,7 @@ export default function PatentDNASequencer({ onNavigate }: PatentDNASequencerPro
               <div className="bg-white p-6 rounded-lg border border-gray-200">
                 <h4 className="text-lg font-medium text-gray-900 mb-4">Technology Mutations</h4>
                 <div className="space-y-4">
-                  {selectedDNA.mutations.map((mutation, index) => (
+                  {selectedDNA.mutations.map((mutation, _index) => (
                     <div key={mutation.id} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">

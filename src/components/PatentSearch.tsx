@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Home, 
   ChevronRight, 
@@ -17,8 +17,11 @@ import {
   Filter,
   HelpCircle,
   Info,
-  Globe
+  Globe,
+  Loader2
 } from 'lucide-react';
+import { patentDatabase, SearchFilters, SearchResult, PatentWithRelations, Patent } from '@/lib/patentDatabase';
+import PatentDetailsModal from './PatentDetailsModal';
 
 interface PatentSearchProps {
   onStartTour?: () => void;
@@ -31,6 +34,22 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
   const [expandedMainSections, setExpandedMainSections] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('structured');
   const [queryText, setQueryText] = useState('');
+  
+  // New state for patent data
+  const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [databaseStats, setDatabaseStats] = useState<any>(null);
+  const [_selectedFilters, _setSelectedFilters] = useState<SearchFilters>({});
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [dateType, setDateType] = useState<'published' | 'filed' | 'priority'>('published');
+  const [selectedJurisdictions, setSelectedJurisdictions] = useState<string[]>([]);
+  const [_selectedClassifications, _setSelectedClassifications] = useState<string[]>([]);
+  const [selectedDocumentTypes, setSelectedDocumentTypes] = useState<string[]>([]);
+  const [selectedFlags, setSelectedFlags] = useState<string[]>([]);
+  const [_hasFullText, _setHasFullText] = useState<boolean>(false);
+  const [selectedPatent, setSelectedPatent] = useState<PatentWithRelations | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const toggleMainSection = (sectionId: string) => {
     setExpandedMainSections(prev => 
@@ -38,6 +57,103 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
         ? prev.filter(id => id !== sectionId)
         : [...prev, sectionId]
     );
+  };
+
+  // Load database statistics on component mount
+  useEffect(() => {
+    const loadDatabaseStats = async () => {
+      try {
+        const stats = await patentDatabase.getDatabaseStats();
+        setDatabaseStats(stats);
+      } catch (error) {
+        console.error('Failed to load database stats:', error);
+      }
+    };
+
+    loadDatabaseStats();
+  }, []);
+
+  // Perform patent search
+  const performSearch = async () => {
+    if (!searchQuery.trim() && Object.keys(_selectedFilters).length === 0) {
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const filters: SearchFilters = {
+        query: searchQuery,
+        field: selectedField === 'All Fields' ? undefined : selectedField,
+        ...(dateFrom || dateTo ? {
+          dateRange: {
+            type: dateType,
+            from: dateFrom || undefined,
+            to: dateTo || undefined
+          }
+        } : {}),
+        ...(selectedJurisdictions.length > 0 ? { jurisdictions: selectedJurisdictions } : {}),
+        ...(_selectedClassifications.length > 0 ? {
+          classifications: {
+            scheme: 'CPC',
+            codes: _selectedClassifications
+          }
+        } : {}),
+        ...(selectedDocumentTypes.length > 0 ? { documentTypes: selectedDocumentTypes } : {}),
+        ...(_hasFullText ? { hasFullText: true } : {})
+      };
+
+      const results = await patentDatabase.searchPatents(filters, 50, 0);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Search failed:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Handle filter changes
+  const toggleJurisdiction = (code: string) => {
+    setSelectedJurisdictions(prev => 
+      prev.includes(code) 
+        ? prev.filter(j => j !== code)
+        : [...prev, code]
+    );
+  };
+
+  const toggleDocumentType = (docType: string) => {
+    setSelectedDocumentTypes(prev => 
+      prev.includes(docType) 
+        ? prev.filter(d => d !== docType)
+        : [...prev, docType]
+    );
+  };
+
+  const toggleFlag = (flag: string) => {
+    setSelectedFlags(prev => 
+      prev.includes(flag) 
+        ? prev.filter(f => f !== flag)
+        : [...prev, flag]
+    );
+  };
+
+  // Handle viewing patent details
+  const handleViewDetails = async (patent: PatentWithRelations) => {
+    try {
+      // If we need more detailed information, fetch it
+      const detailedPatent = await patentDatabase.getPatentById(patent.id);
+      setSelectedPatent(detailedPatent || patent);
+      setIsDetailsModalOpen(true);
+    } catch (error) {
+      console.error('Failed to fetch patent details:', error);
+      // Fallback to current patent data
+      setSelectedPatent(patent);
+      setIsDetailsModalOpen(true);
+    }
+  };
+
+  const closeDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedPatent(null);
   };
 
   const filterSections = [
@@ -330,26 +446,54 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
         <div className="space-y-4">
           <div className="flex gap-4">
             <label className="flex items-center gap-2">
-              <input type="radio" name="dateType" value="published" defaultChecked />
+              <input 
+                type="radio" 
+                name="dateType" 
+                value="published" 
+                checked={dateType === 'published'}
+                onChange={(e) => setDateType(e.target.value as 'published' | 'filed' | 'priority')}
+              />
               <span className="text-sm">Published</span>
             </label>
             <label className="flex items-center gap-2">
-              <input type="radio" name="dateType" value="filed" />
+              <input 
+                type="radio" 
+                name="dateType" 
+                value="filed" 
+                checked={dateType === 'filed'}
+                onChange={(e) => setDateType(e.target.value as 'published' | 'filed' | 'priority')}
+              />
               <span className="text-sm">Filed</span>
             </label>
             <label className="flex items-center gap-2">
-              <input type="radio" name="dateType" value="priority" />
+              <input 
+                type="radio" 
+                name="dateType" 
+                value="priority" 
+                checked={dateType === 'priority'}
+                onChange={(e) => setDateType(e.target.value as 'published' | 'filed' | 'priority')}
+              />
               <span className="text-sm">Priority</span>
             </label>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm text-gray-600">from</label>
-              <input type="date" className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500" />
+              <input 
+                type="date" 
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500" 
+              />
             </div>
             <div>
               <label className="text-sm text-gray-600">to</label>
-              <input type="date" className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500" />
+              <input 
+                type="date" 
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500" 
+              />
             </div>
           </div>
         </div>
@@ -362,6 +506,11 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
       <div className="flex items-center gap-2 mb-4">
         <Flag className="w-4 h-4 text-blue-600" />
         <span className="font-medium text-gray-900">Flags</span>
+        {selectedFlags.length > 0 && (
+          <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+            {selectedFlags.length}
+          </span>
+        )}
         <button 
           onClick={() => toggleMainSection('flags')}
           className="ml-auto"
@@ -377,7 +526,12 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
         <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
           {flagOptions.map((flag, index) => (
             <label key={index} className="flex items-center gap-2 text-sm">
-              <input type="checkbox" className="rounded" />
+              <input 
+                type="checkbox" 
+                className="rounded" 
+                checked={selectedFlags.includes(flag)}
+                onChange={() => toggleFlag(flag)}
+              />
               <span className="text-gray-700">{flag}</span>
             </label>
           ))}
@@ -451,6 +605,11 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
       <div className="flex items-center gap-2 mb-4">
         <MapPin className="w-4 h-4 text-blue-600" />
         <span className="font-medium text-gray-900">Jurisdictions</span>
+        {selectedJurisdictions.length > 0 && (
+          <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+            {selectedJurisdictions.length}
+          </span>
+        )}
         <button 
           onClick={() => toggleMainSection('jurisdictions')}
           className="ml-auto"
@@ -466,7 +625,12 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
         <div className="grid grid-cols-1 gap-1 max-h-60 overflow-y-auto">
           {jurisdictions.map((jurisdiction, index) => (
             <label key={index} className="flex items-center gap-2 p-1 hover:bg-gray-50 rounded text-sm">
-              <input type="checkbox" className="rounded" />
+              <input 
+                type="checkbox" 
+                className="rounded" 
+                checked={selectedJurisdictions.includes(jurisdiction.code)}
+                onChange={() => toggleJurisdiction(jurisdiction.code)}
+              />
               <span className="text-lg">{jurisdiction.flag}</span>
               <span className="text-gray-700">{jurisdiction.name}</span>
             </label>
@@ -481,6 +645,11 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
       <div className="flex items-center gap-2 mb-4">
         <FileText className="w-4 h-4 text-blue-600" />
         <span className="font-medium text-gray-900">Document Type</span>
+        {selectedDocumentTypes.length > 0 && (
+          <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+            {selectedDocumentTypes.length}
+          </span>
+        )}
         <button 
           onClick={() => toggleMainSection('document-type')}
           className="ml-auto"
@@ -496,7 +665,12 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
         <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
           {documentTypes.map((docType, index) => (
             <label key={index} className="flex items-center gap-2 p-1 hover:bg-gray-50 rounded text-sm">
-              <input type="checkbox" className="rounded" />
+              <input 
+                type="checkbox" 
+                className="rounded" 
+                checked={selectedDocumentTypes.includes(docType)}
+                onChange={() => toggleDocumentType(docType)}
+              />
               <span className="text-gray-700">{docType}</span>
             </label>
           ))}
@@ -616,7 +790,13 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
             <Home className="w-4 h-4" />
-            <span>165,281,274 Patents (93,379,056 Simple families)</span>
+            <span>
+              {databaseStats ? (
+                `${databaseStats.totalPatents.toLocaleString()} Patents (${Math.floor(databaseStats.totalPatents * 0.56).toLocaleString()} Simple families)`
+              ) : (
+                'Loading patent statistics...'
+              )}
+            </span>
           </div>
 
           {/* Header with Search Button */}
@@ -626,10 +806,16 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
               <span className="text-sm text-gray-600">Explore Science, Technology & Innovation...</span>
               <HelpCircle className="w-5 h-5 text-gray-400" />
               <button 
-                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 flex items-center gap-2"
+                onClick={performSearch}
+                disabled={isSearching}
+                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Search className="w-4 h-4" />
-                Search
+                {isSearching ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Search className="w-4 h-4" />
+                )}
+                {isSearching ? 'Searching...' : 'Search'}
                 <ChevronDown className="w-4 h-4" />
               </button>
             </div>
@@ -658,27 +844,39 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
           <div className="grid grid-cols-6 gap-4 mb-8">
             <div className="text-center">
               <div className="text-blue-600 text-sm font-medium mb-1">Patent Records</div>
-              <div className="text-2xl font-bold text-gray-900">165,281,274</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {databaseStats ? databaseStats.totalPatents.toLocaleString() : '...'}
+              </div>
             </div>
             <div className="text-center">
               <div className="text-gray-600 text-sm font-medium mb-1">Patent Citations</div>
-              <div className="text-2xl font-bold text-gray-900">482,259,938</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {databaseStats ? databaseStats.totalCitations.toLocaleString() : '...'}
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-gray-600 text-sm font-medium mb-1">Cites Patents</div>
-              <div className="text-2xl font-bold text-gray-900">53,973,473</div>
+              <div className="text-gray-600 text-sm font-medium mb-1">Total Inventors</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {databaseStats ? databaseStats.totalInventors.toLocaleString() : '...'}
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-gray-600 text-sm font-medium mb-1">Cited By Patents</div>
-              <div className="text-2xl font-bold text-gray-900">62,754,553</div>
+              <div className="text-gray-600 text-sm font-medium mb-1">Total Assignees</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {databaseStats ? databaseStats.totalAssignees.toLocaleString() : '...'}
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-teal-600 text-sm font-medium mb-1">Simple Families</div>
-              <div className="text-2xl font-bold text-gray-900">93,379,056</div>
+              <div className="text-teal-600 text-sm font-medium mb-1">Classifications</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {databaseStats ? databaseStats.totalClassifications.toLocaleString() : '...'}
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-gray-600 text-sm font-medium mb-1">Extended Families</div>
-              <div className="text-2xl font-bold text-gray-900">89,592,640</div>
+              <div className="text-gray-600 text-sm font-medium mb-1">Last Updated</div>
+              <div className="text-sm font-medium text-gray-700">
+                {databaseStats ? new Date(databaseStats.lastUpdated).toLocaleDateString() : '...'}
+              </div>
             </div>
           </div>
 
@@ -783,8 +981,19 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
 
               {/* Search Button */}
               <div className="mt-6">
-                <button className="px-6 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">
-                  Search
+                <button 
+                  onClick={performSearch}
+                  disabled={isSearching}
+                  className="px-6 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isSearching ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    'Search'
+                  )}
                 </button>
               </div>
             </div>
@@ -856,8 +1065,19 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
 
                 {/* Search Button */}
                 <div className="mt-6">
-                  <button className="px-6 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">
-                    Search
+                  <button 
+                    onClick={performSearch}
+                    disabled={isSearching}
+                    className="px-6 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isSearching ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Searching...
+                      </>
+                    ) : (
+                      'Search'
+                    )}
                   </button>
                 </div>
               </div>
@@ -871,6 +1091,208 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Profiles</h3>
                 <p className="text-gray-600">Profile search functionality coming soon...</p>
               </div>
+            </div>
+          )}
+
+          {/* Search Results */}
+          {searchResults && (
+            <div className="bg-white rounded-lg border border-gray-200 mb-6">
+              {/* Results Header */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Search Results ({searchResults.totalCount.toLocaleString()} patents found)
+                  </h2>
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <span>Sort by: Relevance</span>
+                    <select className="px-3 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+                      <option>Relevance</option>
+                      <option>Grant Date (newest)</option>
+                      <option>Grant Date (oldest)</option>
+                      <option>Filing Date (newest)</option>
+                      <option>Filing Date (oldest)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Applied Filters */}
+                <div className="flex flex-wrap gap-2">
+                  {searchQuery && (
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded">
+                      Query: "{searchQuery}"
+                      <button className="ml-1 hover:text-blue-600">
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedJurisdictions.map(jurisdiction => (
+                    <span key={jurisdiction} className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm rounded">
+                      Jurisdiction: {jurisdiction}
+                      <button 
+                        onClick={() => toggleJurisdiction(jurisdiction)}
+                        className="ml-1 hover:text-green-600"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  {(dateFrom || dateTo) && (
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded">
+                      Date: {dateFrom || 'any'} to {dateTo || 'any'} ({dateType})
+                      <button 
+                        onClick={() => { setDateFrom(''); setDateTo(''); }}
+                        className="ml-1 hover:text-purple-600"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Results List */}
+              <div className="divide-y divide-gray-200">
+                {searchResults.patents.map((patent, _index) => (
+                  <div key={patent.id} className="p-6 hover:bg-gray-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        {/* Patent Number and Status */}
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-sm font-medium text-blue-600">
+                            {patent.patent_number}
+                          </span>
+                          <span className={`px-2 py-1 text-xs rounded capitalize ${
+                            patent.status === 'active' ? 'bg-green-100 text-green-800' :
+                            patent.status === 'expired' ? 'bg-red-100 text-red-800' :
+                            patent.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {patent.status}
+                          </span>
+                          {patent.full_text_available && (
+                            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                              Full Text
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2 leading-tight">
+                          {patent.title}
+                        </h3>
+
+                        {/* Abstract */}
+                        {patent.abstract_text && (
+                          <p className="text-gray-600 text-sm mb-3 leading-relaxed line-clamp-3">
+                            {patent.abstract_text}
+                          </p>
+                        )}
+
+                        {/* Metadata */}
+                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
+                          <div>
+                            <span className="font-medium">Filing Date:</span> {new Date(patent.filing_date).toLocaleDateString()}
+                          </div>
+                          <div>
+                            <span className="font-medium">Grant Date:</span> {new Date(patent.grant_date).toLocaleDateString()}
+                          </div>
+                          {patent.claims_count && (
+                            <div>
+                              <span className="font-medium">Claims:</span> {patent.claims_count}
+                            </div>
+                          )}
+                          {patent.page_count && (
+                            <div>
+                              <span className="font-medium">Pages:</span> {patent.page_count}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Inventors & Assignees */}
+                        <div className="mt-3 space-y-2">
+                          {patent.inventors.length > 0 && (
+                            <div className="text-sm">
+                              <span className="font-medium text-gray-700">Inventors: </span>
+                              <span className="text-gray-600">
+                                {patent.inventors.map(inv => `${inv.first_name} ${inv.last_name}`).join(', ')}
+                              </span>
+                            </div>
+                          )}
+                          {patent.assignees.length > 0 && (
+                            <div className="text-sm">
+                              <span className="font-medium text-gray-700">Assignees: </span>
+                              <span className="text-gray-600">
+                                {patent.assignees.map(asg => asg.name).join(', ')}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Classifications */}
+                        {patent.classifications.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-1">
+                            {patent.classifications.slice(0, 5).map((cls, clsIndex) => (
+                              <span 
+                                key={clsIndex}
+                                className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+                              >
+                                {cls.full_code}
+                              </span>
+                            ))}
+                            {patent.classifications.length > 5 && (
+                              <span className="inline-block px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded">
+                                +{patent.classifications.length - 5} more
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="ml-6 flex flex-col gap-2">
+                        <button 
+                          onClick={() => handleViewDetails(patent)}
+                          className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 border border-blue-600 rounded hover:bg-blue-50"
+                        >
+                          View Details
+                        </button>
+                        <button className="px-3 py-1 text-sm text-gray-600 hover:text-gray-700 border border-gray-300 rounded hover:bg-gray-50">
+                          Save to Collection
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {searchResults.totalCount > 50 && (
+                <div className="p-6 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Showing 1 to {Math.min(50, searchResults.totalCount)} of {searchResults.totalCount.toLocaleString()} results
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                        Previous
+                      </button>
+                      <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                        1
+                      </button>
+                      <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                        2
+                      </button>
+                      <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                        3
+                      </button>
+                      <span className="px-3 py-1 text-sm text-gray-500">...</span>
+                      <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -954,6 +1376,13 @@ export default function PatentSearch({ onStartTour: _onStartTour }: PatentSearch
           </div>
         </div>
       </div>
+
+      {/* Patent Details Modal */}
+      <PatentDetailsModal 
+        patent={selectedPatent as Patent | null}
+        isOpen={isDetailsModalOpen}
+        onClose={closeDetailsModal}
+      />
     </div>
   );
 }

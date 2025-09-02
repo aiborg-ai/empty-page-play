@@ -2,12 +2,83 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    
+    <!-- PWA and Mobile Viewport Configuration -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="InnoSpot" />
+    <meta name="application-name" content="InnoSpot" />
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+    <meta name="theme-color" content="#3b82f6" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Icons -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>InnoSpot - Innovation Intelligence</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-192x192.png" />
+    <link rel="mask-icon" href="/icons/icon-192x192.png" color="#3b82f6" />
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="InnoSpot - Innovation Intelligence Platform" />
+    <meta property="og:description" content="Your comprehensive patent intelligence platform for discovering and analyzing cutting-edge research and patents." />
+    <meta property="og:image" content="/screenshots/desktop-home.png" />
+    <meta property="og:url" content="https://innospot.vercel.app" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="InnoSpot - Innovation Intelligence Platform" />
+    <meta name="twitter:description" content="Your comprehensive patent intelligence platform for discovering and analyzing cutting-edge research and patents." />
+    <meta name="twitter:image" content="/screenshots/desktop-home.png" />
+    
+    <!-- SEO -->
+    <meta name="description" content="InnoSpot is a comprehensive patent intelligence platform for innovation professionals, featuring AI-powered research tools, patent analysis, and competitive intelligence." />
+    <meta name="keywords" content="patent intelligence, innovation, research, IP analysis, competitive intelligence, patent search, AI-powered research" />
+    <meta name="author" content="InnoSpot Team" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Performance and Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://api.openrouter.ai" />
+    <link rel="preconnect" href="https://supabase.co" />
+    
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//api.openrouter.ai" />
+    <link rel="dns-prefetch" href="//supabase.co" />
+    
+    <title>InnoSpot - Innovation Intelligence Platform</title>
+    
+    <!-- Disable zoom on inputs for iOS -->
+    <style>
+      @media screen and (-webkit-min-device-pixel-ratio: 0) {
+        select:focus,
+        textarea:focus,
+        input:focus {
+          font-size: 16px !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, function(err) {
+              console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

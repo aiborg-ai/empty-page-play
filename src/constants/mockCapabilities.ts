@@ -1,4 +1,4 @@
-import { Capability, CapabilityCategory } from '../types/capabilities';
+import { Capability } from '../types/capabilities';
 
 // Dataset capabilities from data dictionaries
 const DATASET_CAPABILITIES: Capability[] = [

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Circle, TrendingUp, DollarSign } from 'lucide-react';
+import { Circle } from 'lucide-react';
 
 interface PortfolioBubbleChartProps {
   data: Record<string, any>;
@@ -71,7 +71,7 @@ const PortfolioBubbleChart: React.FC<PortfolioBubbleChartProps> = ({ data }) => 
 
         {/* Bubbles */}
         <div className="absolute inset-6">
-          {portfolioData.map((patent: any, index: number) => (
+          {portfolioData.map((patent: any, _index: number) => (
             <div
               key={patent.id}
               className={`absolute ${getBubbleSize(patent.size)} ${getBubbleColor(patent.category)} 

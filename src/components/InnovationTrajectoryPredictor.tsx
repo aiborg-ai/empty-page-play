@@ -101,7 +101,7 @@ const InnovationTrajectoryPredictor: React.FC<InnovationTrajectoryPredictorProps
   const [focusAreas, setFocusAreas] = useState<string[]>([]);
   
   const [isPredicting, setIsPredicting] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const [_predictions, setPredictions] = useState<TrajectoryPrediction[]>([]);
   const [activePrediction, setActivePrediction] = useState<TrajectoryPrediction | null>(null);
   const [selectedTab, setSelectedTab] = useState<'trends' | 'convergences' | 'disruptions' | 'investment'>('trends');

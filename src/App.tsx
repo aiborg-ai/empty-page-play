@@ -1,56 +1,145 @@
-import { useState, useEffect } from 'react';
+/**
+ * ============================================================================
+ * InnoSpot Patent Intelligence Platform - Main Application
+ * ============================================================================
+ * 
+ * This is the root component that orchestrates the entire InnoSpot application.
+ * It manages authentication, routing, global state, and renders the appropriate
+ * components based on user navigation.
+ * 
+ * Key Features:
+ * - InstantAuth authentication system for demo users
+ * - Dynamic navigation with 30+ sections
+ * - Innovation management tools
+ * - Advanced analytics and collaboration features
+ * - Enterprise-grade functionality
+ * - Patent marketplace and monetization
+ * 
+ * @author InnoSpot Development Team
+ * @version 2.0.0
+ * @since 2024
+ */
+
+import React, { useState, useEffect } from 'react';
+
+// ============================================================================
+// AUTHENTICATION & CORE SERVICES
+// ============================================================================
 import { InstantAuthService, InstantUser } from './lib/instantAuth';
+import { isDemoActive, getDemoUser } from './lib/liveDemoService';
+import DemoBanner from './components/DemoBanner';
+
+// ============================================================================
+// UI COMPONENTS & ICONS
+// ============================================================================
 import { Search, Filter, Plus, Bot, Wrench, Database, Eye, X } from 'lucide-react';
+
+// ============================================================================
+// LAYOUT COMPONENTS
+// ============================================================================
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
+
+// ============================================================================
+// AUTHENTICATION COMPONENTS
+// ============================================================================
 import RegisterForm from './components/RegisterForm';
 import LoginForm from './components/LoginForm';
 import AccountSettings from './components/AccountSettings';
 import PlatformTour from './components/PlatformTour';
+
+// ============================================================================
+// CORE DASHBOARD COMPONENTS
+// ============================================================================
+import Home from './components/Home';
 import PatentSearch from './components/PatentSearch';
+import PatentAnalyticsDashboard from './components/PatentAnalyticsDashboard';
+import WorkArea from './components/WorkArea';
+import Spaces from './components/Spaces';
+
+// ============================================================================
+// ANALYTICS & VISUALIZATION DASHBOARDS
+// ============================================================================
 import JurisdictionDashboard from './components/JurisdictionDashboard';
 import ApplicantsDashboard from './components/ApplicantsDashboard';
 import PatentCitationsDashboard from './components/PatentCitationsDashboard';
 import LegalStatusDashboard from './components/LegalStatusDashboard';
 import OwnersDashboard from './components/OwnersDashboard';
-import WorkArea from './components/WorkArea';
-import ProjectsSupport from './components/ProjectsSupport';
-import Spaces from './components/Spaces';
 import UserDashboards from './components/UserDashboards';
-import DashboardsSupport from './components/DashboardsSupport';
-import ClaimedWork from './components/ClaimedWork';
-import ClaimedWorkSupport from './components/ClaimedWorkSupport';
-import AIChat from './components/AIChat';
-import AIChatSupport from './components/AIChatSupport';
+import VisualPatentExplorer from './components/VisualPatentExplorer';
+
+// ============================================================================
+// CMS & CONTENT MANAGEMENT
+// ============================================================================
 import ShowcaseModern from './components/ShowcaseModern';
 import CMSAdmin from './components/CMSAdmin';
 import CMSStudioModern from './components/CMSStudioModern';
-import SubscriptionDetails from './components/SubscriptionDetails';
-import Checkout from './components/Checkout';
-import PaymentSuccess from './components/PaymentSuccess';
-// Innovation Hub Components
-import InnovationHub from './components/InnovationHub';
-import Home from './components/Home';
 import ReportsModern from './components/ReportsModern';
+
+// ============================================================================
+// USER MANAGEMENT & COLLABORATION
+// ============================================================================
+import ClaimedWork from './components/ClaimedWork';
+import AIChat from './components/AIChat';
+
+// ============================================================================
+// INNOVATION HUB COMPONENTS
+// ============================================================================
+import InnovationHub from './components/InnovationHub';
+import InnovationManagerHub from './components/innovation/InnovationManagerHub';
+
+// ============================================================================
+// AI-POWERED TOOLS & ANALYSIS
+// ============================================================================
 import AIClaimGenerator from './components/AIClaimGenerator';
 import CollisionDetection from './components/CollisionDetection';
 import Citation3DVisualization from './components/Citation3DVisualization';
 import BlockchainProvenance from './components/BlockchainProvenance';
 
-// New AI Intelligence Features
+// ============================================================================
+// ADVANCED AI INTELLIGENCE FEATURES
+// ============================================================================
 import OpportunityGapScanner from './components/OpportunityGapScanner';
 import AIPatentClaimGenerator from './components/AIPatentClaimGenerator';
 import PriorArtOracle from './components/PriorArtOracle';
 import InnovationTrajectoryPredictor from './components/InnovationTrajectoryPredictor';
 import AIServicesConfig from './components/AIServicesConfig';
+
+// ============================================================================
+// COMMUNICATION & NETWORKING
+// ============================================================================
 import NetworkPage from './components/NetworkPage';
 import Messages from './components/Messages';
+
+// ============================================================================
+// ENTERPRISE & DECISION SUPPORT
+// ============================================================================
 import DecisionEngines from './components/DecisionEngines';
 import PatentMonitoring from './components/PatentMonitoring';
 import PatentValuation from './components/PatentValuation';
 import CompetitiveIntelligence from './components/CompetitiveIntelligence';
+
+// ============================================================================
+// SYSTEM & SUPPORT COMPONENTS
+// ============================================================================
+// import DatabaseTestPanel from './components/DatabaseTestPanel'; // Commented out - uses Node.js pg module
 import SupportPage from './components/SupportPage';
+
+// ============================================================================
+// SUPPORT COMPONENTS (Legacy)
+// ============================================================================
+import ProjectsSupport from './components/ProjectsSupport';
+import DashboardsSupport from './components/DashboardsSupport';
+import ClaimedWorkSupport from './components/ClaimedWorkSupport';
+import AIChatSupport from './components/AIChatSupport';
+
+// ============================================================================
+// E-COMMERCE & SUBSCRIPTION
+// ============================================================================
+import SubscriptionDetails from './components/SubscriptionDetails';
+import Checkout from './components/Checkout';
+import PaymentSuccess from './components/PaymentSuccess';
 
 // Revolutionary Innovation Intelligence Components
 import PatentDNASequencer from './components/PatentDNASequencer';
@@ -58,22 +147,131 @@ import InnovationPulseMonitor from './components/InnovationPulseMonitor';
 import WhiteSpaceCartographer from './components/WhiteSpaceCartographer';
 import InventionCollisionPredictor from './components/InventionCollisionPredictor';
 
+// Integration Features
+import IntegrationsHub from './integrations/IntegrationsHub';
+
+// Automation Features
+import AutomationHub from './automation/AutomationHub';
+
+// ============================================================================
+// TYPE DEFINITIONS & SERVICES
+// ============================================================================
 import { Product, CartItem } from './types/subscription';
 import { SpaceContextService } from './lib/spaceContext';
 import { Space } from './types/spaces';
 
+/**
+ * ============================================================================
+ * Main Application Component
+ * ============================================================================
+ * 
+ * The central hub of the InnoSpot application that manages:
+ * - User authentication and session state
+ * - Navigation between different sections
+ * - Global application state (spaces, products, cart)
+ * - Layout rendering and component orchestration
+ * 
+ * State Management:
+ * - Authentication: Uses InstantAuth for demo users with real Supabase fallback
+ * - Navigation: Single activeSection state controls which component renders
+ * - Space Context: Global project/space selection affects multiple features
+ * - E-commerce: Shopping cart and subscription management
+ * 
+ * @returns {JSX.Element} The complete application interface
+ */
 function App() {
+  // ============================================================================
+  // NAVIGATION & ROUTING STATE
+  // ============================================================================
+  
+  /**
+   * Controls which section/component is currently active
+   * Possible values: register, login, dashboard, showcase, cms-admin, etc.
+   */
   const [activeSection, setActiveSection] = useState('register');
+  
+  // ============================================================================
+  // AUTHENTICATION STATE
+  // ============================================================================
+  
+  /**
+   * Current authenticated user (null if not logged in)
+   * Uses InstantAuth system for demo users with seamless experience
+   */
   const [currentUser, setCurrentUser] = useState<InstantUser | null>(null);
+  
+  // ============================================================================
+  // UI INTERACTION STATE
+  // ============================================================================
+  
+  /**
+   * Controls platform tour modal visibility
+   * Tour shows new users how to navigate the application
+   */
   const [showTour, setShowTour] = useState(false);
+  
+  /**
+   * Controls AI Chat panel visibility
+   * AI Chat is available from sidebar and provides contextual assistance
+   */
   const [showAIChat, setShowAIChat] = useState(false);
+  
+  // ============================================================================
+  // E-COMMERCE & SUBSCRIPTION STATE
+  // ============================================================================
+  
+  /**
+   * Currently selected product for detailed view or purchase
+   * Used in subscription flow and product showcase
+   */
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  /**
+   * Shopping cart items for subscription purchases
+   * Supports multiple items with quantities and product details
+   */
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  
+  /**
+   * Invoice ID for successful payments
+   * Used to display payment success page and track transactions
+   */
   const [invoiceId, setInvoiceId] = useState<string>('');
+  
+  /**
+   * Currently selected category in the showcase
+   * Filters available tools and capabilities: 'all', 'ai-agents', 'tools', etc.
+   */
   const [showcaseCategory, setShowcaseCategory] = useState<string>('all');
+  
+  // ============================================================================
+  // SPACE/PROJECT CONTEXT STATE
+  // ============================================================================
+  
+  /**
+   * Currently selected workspace/project space
+   * Global context that affects multiple features (CMS, Showcase, Work Area)
+   * Managed via SpaceContextService singleton
+   */
   const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
+  
+  /**
+   * Support section routing parameter
+   * Used to navigate to specific help topics in the support system
+   */
   const [supportSection, setSupportSection] = useState<string | undefined>(undefined);
 
+  // ============================================================================
+  // NAVIGATION FUNCTIONS
+  // ============================================================================
+  
+  /**
+   * Main navigation handler for section switching
+   * Updates activeSection state and optional category filter
+   * 
+   * @param {string} section - The target section ID (e.g., 'dashboard', 'showcase')
+   * @param {string} [category] - Optional category filter for filtered views
+   */
   const navigate = (section: string, category?: string) => {
     setActiveSection(section);
     if (category) {
@@ -85,63 +283,135 @@ function App() {
     }
   };
 
+  // ============================================================================
+  // COMPONENT LIFECYCLE & EFFECTS
+  // ============================================================================
+  
+  /**
+   * Initialize authentication state and context services on component mount
+   * 
+   * Responsibilities:
+   * - Check for existing user session and restore authentication state
+   * - Initialize space context service for global project selection
+   * - Set up listeners for space changes across the application
+   * - Navigate to appropriate initial section based on auth state
+   */
   useEffect(() => {
-    // Check if user is already logged in
+    // Check for active Live Demo session first
+    if (isDemoActive()) {
+      const demoUser = getDemoUser();
+      if (demoUser) {
+        setCurrentUser(demoUser);
+        setActiveSection('showcase'); // Demo users start at showcase
+        console.log('🚀 Live Demo Session Active:', demoUser);
+        return;
+      }
+    }
+    
+    // Check if user is already logged in via InstantAuth
     const user = InstantAuthService.getCurrentUser();
     if (user) {
       setCurrentUser(user);
-      setActiveSection('showcase');
+      setActiveSection('showcase'); // Authenticated users start at showcase
     }
     
-    // Initialize space context
+    // Initialize and set up space context service for global project/workspace selection
     const contextService = SpaceContextService.getInstance();
     contextService.initialize();
     
+    // Listen for space changes and update local state
     const unsubscribe = contextService.addSpaceChangeListener((space) => {
       setCurrentSpace(space);
     });
 
+    // Cleanup subscription on component unmount
     return unsubscribe;
   }, []);
 
+  // ============================================================================
+  // AUTHENTICATION EVENT HANDLERS
+  // ============================================================================
+  
+  /**
+   * Handle successful user registration
+   * Updates authentication state and navigates to main application
+   */
   const handleRegistrationSuccess = () => {
     const user = InstantAuthService.getCurrentUser();
     setCurrentUser(user);
-    setActiveSection('showcase');
+    setActiveSection('showcase'); // New users start with the showcase
   };
 
+  /**
+   * Handle successful user login
+   * Updates authentication state and navigates to main application
+   */
   const handleLoginSuccess = () => {
     const user = InstantAuthService.getCurrentUser();
     setCurrentUser(user);
-    setActiveSection('showcase');
+    setActiveSection('showcase'); // Returning users go to showcase
   };
 
+  /**
+   * Handle user sign out
+   * Clears authentication state and returns to registration
+   */
   const handleSignOut = () => {
     InstantAuthService.logout();
     setCurrentUser(null);
     setActiveSection('register');
   };
 
+  /**
+   * General navigation handler
+   * Simple wrapper for setActiveSection used by various components
+   * 
+   * @param {string} section - The target section to navigate to
+   */
   const handleNavigate = (section: string) => {
     setActiveSection(section);
   };
 
+  // ============================================================================
+  // UI INTERACTION HANDLERS
+  // ============================================================================
+  
+  /**
+   * Start the platform tour for new users
+   * Opens the interactive tour modal with step-by-step guidance
+   */
   const handleStartTour = () => {
     setShowTour(true);
   };
 
+  /**
+   * Close the platform tour modal
+   * User can dismiss tour without completing it
+   */
   const handleTourClose = () => {
     setShowTour(false);
   };
 
+  /**
+   * Handle tour completion
+   * Called when user finishes all tour steps
+   */
   const handleTourComplete = () => {
     setShowTour(false);
   };
 
+  /**
+   * Toggle AI Chat panel visibility
+   * AI Chat can be opened/closed from sidebar or keyboard shortcut
+   */
   const handleToggleAIChat = () => {
     setShowAIChat(!showAIChat);
   };
 
+  /**
+   * Close AI Chat panel
+   * Called when user clicks close button or clicks outside panel
+   */
   const handleCloseAIChat = () => {
     setShowAIChat(false);
   };
@@ -219,6 +489,15 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Show Demo Banner when in Live Demo mode */}
+      {currentUser?.isDemo && isDemoActive() && (
+        <DemoBanner 
+          onUpgrade={() => {
+            setActiveSection('register');
+          }}
+        />
+      )}
+      
       <Header 
         user={currentUser} 
         onSignOut={handleSignOut}
@@ -296,6 +575,14 @@ function App() {
               <CurrentProjectBanner />
               <div className="flex-1 -m-6">
                 <PatentSearch onStartTour={handleStartTour} />
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'analytics' && (
+            <div className="h-full bg-gray-50 flex flex-col">
+              <div className="flex-1 -m-6">
+                <PatentAnalyticsDashboard onStartTour={handleStartTour} />
               </div>
             </div>
           )}
@@ -714,6 +1001,13 @@ function App() {
             </div>
           )}
 
+          {/* Innovation Manager Hub - New Feature */}
+          {activeSection === 'innovation-manager' && currentUser && (
+            <div className="flex-1 -m-6">
+              <InnovationManagerHub />
+            </div>
+          )}
+
           {/* Decision Engines */}
           {activeSection === 'decision-engines' && currentUser && (
             <div className="flex-1 -m-6">
@@ -724,6 +1018,13 @@ function App() {
             </div>
           )}
 
+          {/* Visual Patent Explorer */}
+          {activeSection === 'visual-patent-explorer' && currentUser && (
+            <div className="flex-1 -m-6">
+              <VisualPatentExplorer onStartTour={handleStartTour} />
+            </div>
+          )}
+          
           {/* Patent Monitoring */}
           {activeSection === 'patent-monitoring' && currentUser && (
             <div className="flex-1 -m-6">
@@ -788,7 +1089,7 @@ function App() {
             </div>
           )}
 
-          {activeSection === 'collision-detection' && currentUser && (
+          {activeSection === 'collision-detection' && !!currentUser && (
             <div className="flex-1 -m-6">
               <CollisionDetection 
                 currentUser={currentUser} 
@@ -798,12 +1099,14 @@ function App() {
           )}
 
           {activeSection === 'citation-3d' && currentUser && (
-            <div className="flex-1 -m-6">
-              <Citation3DVisualization 
-                currentUser={currentUser} 
-                projectId={currentSpace?.id}
-              />
-            </div>
+            <React.Fragment>
+              <div className="flex-1 -m-6">
+                <Citation3DVisualization 
+                  currentUser={currentUser} 
+                  projectId={currentSpace?.id}
+                />
+              </div>
+            </React.Fragment>
           )}
 
           {activeSection === 'blockchain-provenance' && currentUser && (
@@ -860,6 +1163,18 @@ function App() {
             </div>
           )}
 
+          {activeSection === 'integrations' && currentUser && (
+            <div className="flex-1 -m-6">
+              <IntegrationsHub userId={currentUser.id} />
+            </div>
+          )}
+
+          {activeSection === 'automation' && currentUser && (
+            <div className="flex-1 -m-6">
+              <AutomationHub projectId={currentSpace?.id} onClose={() => setActiveSection('dashboard')} />
+            </div>
+          )}
+
           {activeSection === 'support' && (
             <div className="flex-1 -m-6">
               <SupportPage initialSection={supportSection} />
@@ -896,6 +1211,11 @@ function App() {
                 onGoHome={handleGoHome}
               />
             </div>
+          )}
+
+          {/* Database Test Panel */}
+          {activeSection === 'database-test' && currentUser && (
+            {/* <DatabaseTestPanel /> */}
           )}
         </main>
       </div>

@@ -12,17 +12,17 @@ interface PerformanceMonitorProps {
   children: React.ReactNode;
 }
 
-interface PerformanceEntry {
-  name: string;
-  startTime: number;
-  duration: number;
-}
+// interface _PerformanceEntry { // Unused - for future performance tracking
+//   name: string;
+//   startTime: number;
+//   duration: number;
+// }
 
 class SearchFilterPerformanceMonitor {
   private static instance: SearchFilterPerformanceMonitor;
   private metrics: SearchFilterMetrics[] = [];
   private events: SearchEvent[] = [];
-  private performanceEntries: PerformanceEntry[] = [];
+  // private performanceEntries: PerformanceEntry[] = [];
 
   static getInstance(): SearchFilterPerformanceMonitor {
     if (!SearchFilterPerformanceMonitor.instance) {
@@ -97,7 +97,7 @@ class SearchFilterPerformanceMonitor {
   clear() {
     this.metrics = [];
     this.events = [];
-    this.performanceEntries = [];
+    // this.performanceEntries = [];
   }
 }
 
@@ -166,7 +166,7 @@ export default function PerformanceMonitor({
   }, [enabled, onMetricsCapture, onEventTrack]);
 
   // Expose performance monitoring functions via context or props
-  const trackSearchEvent = (query: string, resultCount: number, latency: number) => {
+  /* const _trackSearchEvent = (_query: string, _resultCount: number, _latency: number) => {
     if (!enabled || !monitorRef.current) return;
 
     const metrics: SearchFilterMetrics = {
@@ -191,7 +191,7 @@ export default function PerformanceMonitor({
     onEventTrack?.(event);
   };
 
-  const trackFilterEvent = (filterId: string, filterValue: unknown, resultCount: number, latency: number) => {
+  const _trackFilterEvent = (_filterId: string, _filterValue: unknown, _resultCount: number, _latency: number) => {
     if (!enabled || !monitorRef.current) return;
 
     const metrics: SearchFilterMetrics = {
@@ -215,7 +215,7 @@ export default function PerformanceMonitor({
     
     onMetricsCapture?.(metrics);
     onEventTrack?.(event);
-  };
+  }; */
 
   // If monitoring is disabled, just render children
   if (!enabled) {

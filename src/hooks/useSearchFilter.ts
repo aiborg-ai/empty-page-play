@@ -92,7 +92,7 @@ export function useSearchFilter(config: SearchFilterConfig = {}): UseSearchFilte
 
   // Debounced callbacks for external handlers
   const debouncedOnSearchChange = useDebouncedCallback(
-    mergedConfig.onSearchChange,
+    ((query: string) => mergedConfig.onSearchChange(query)) as (...args: unknown[]) => unknown,
     mergedConfig.debounceMs
   );
 

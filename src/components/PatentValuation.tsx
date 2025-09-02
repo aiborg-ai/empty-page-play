@@ -186,7 +186,7 @@ const PatentValuation: React.FC<PatentValuationProps> = ({ currentUser, onNaviga
                 </div>
                 <div className="flex items-center gap-2">
                   <Award className="w-5 h-5" />
-                  <span className="text-sm">Top {dashboardData.benchmarking.industryPercentile}th Percentile</span>
+                  <span className="text-sm">Rank #{dashboardData.benchmarking.industryRanking}</span>
                 </div>
               </div>
             </div>

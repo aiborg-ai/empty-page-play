@@ -39,7 +39,7 @@ interface AssetsProps {
   onNavigate?: (section: string) => void;
 }
 
-const Assets: React.FC<AssetsProps> = ({ currentUser, onNavigate }) => {
+const Assets: React.FC<AssetsProps> = ({ currentUser, onNavigate: _onNavigate }) => {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');

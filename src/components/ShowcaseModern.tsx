@@ -18,7 +18,7 @@ import {
   Play,
   Plug2
 } from 'lucide-react';
-import { CapabilityCategory } from '../types/capabilities';
+import { Capability, CapabilityCategory } from '../types/capabilities';
 import { useSpaceContext } from '../hooks/useSpaceContext';
 import { useShowcase } from '../hooks/useShowcase';
 import { RunCapabilityModal } from './modals/RunCapabilityModal';
@@ -37,7 +37,7 @@ interface ShowcaseProps {
   initialCategory?: CapabilityCategory | 'all';
 }
 
-const CATEGORY_CONFIGS = {
+/* const CATEGORY_CONFIGS = {
   'all': { icon: Store, color: 'gray', bgGradient: 'from-gray-600 to-gray-700' },
   'ai': { icon: Bot, color: 'purple', bgGradient: 'from-purple-600 to-pink-600' },
   'analysis': { icon: Wrench, color: 'blue', bgGradient: 'from-blue-600 to-cyan-600' },
@@ -46,10 +46,10 @@ const CATEGORY_CONFIGS = {
   'automation': { icon: BarChart3, color: 'indigo', bgGradient: 'from-indigo-600 to-purple-600' },
   'mcp': { icon: Plug2, color: 'teal', bgGradient: 'from-teal-600 to-cyan-600' },
   'datasets': { icon: Database, color: 'yellow', bgGradient: 'from-yellow-600 to-amber-600' }
-};
+}; */
 
 
-export default function ShowcaseModern({ initialCategory = 'all', onNavigate }: ShowcaseProps) {
+export default function ShowcaseModern({ initialCategory = 'all', onNavigate: _onNavigate }: ShowcaseProps) {
   const { currentSpace: currentProject } = useSpaceContext();
   
   // Original showcase data
@@ -96,9 +96,12 @@ export default function ShowcaseModern({ initialCategory = 'all', onNavigate }: 
       description: cap.description,
       category: cap.category,
       tags: cap.tags,
-      createdAt: cap.metadata?.createdAt,
-      updatedAt: cap.metadata?.updatedAt,
-      metadata: cap.metadata
+      createdAt: cap.lastUpdated,
+      updatedAt: cap.lastUpdated,
+      metadata: {
+        createdAt: cap.lastUpdated,
+        updatedAt: cap.lastUpdated
+      }
     }));
     
     const filtered = filterCapabilities(capabilitiesAsFilterable, filterState);
@@ -106,7 +109,7 @@ export default function ShowcaseModern({ initialCategory = 'all', onNavigate }: 
     // Map back to original capability objects
     return filtered.map(filtered => 
       capabilities.find(cap => cap.id === filtered.id)
-    ).filter(Boolean);
+    ).filter((cap): cap is Capability => cap !== undefined);
   }, [capabilities, filterState, filterCapabilities]);
 
   // Load downloaded capabilities when component mounts or capabilities change
@@ -287,7 +290,19 @@ export default function ShowcaseModern({ initialCategory = 'all', onNavigate }: 
           ]}
           className="-mx-6 mb-6"
           // State and actions from hook
-          {...filterState}
+          searchQuery={filterState.searchQuery}
+          selectedCategory={filterState.selectedCategory}
+          selectedSort={filterState.selectedSort}
+          activeFilters={filterState.activeFilters}
+          isExpanded={filterState.isExpanded}
+          activeFilterCount={filterState.activeFilterCount}
+          setSearchQuery={filterState.setSearchQuery}
+          setSelectedCategory={filterState.setSelectedCategory}
+          setSelectedSort={filterState.setSelectedSort}
+          setActiveFilter={filterState.setActiveFilter}
+          toggleQuickFilter={filterState.toggleQuickFilter}
+          clearAllFilters={filterState.clearAllFilters}
+          setExpanded={filterState.setExpanded}
         />
 
         {/* Main Content */}
@@ -330,8 +345,9 @@ export default function ShowcaseModern({ initialCategory = 'all', onNavigate }: 
                   : "space-y-4"
                 }>
                   {filteredCapabilities.map(capability => {
-                    const TypeIcon = getTypeIcon(capability.type);
-                    const isAvailable = capability.isPurchased || capability.price.amount === 0;
+                    if (!capability) return null;
+                    const TypeIcon = getTypeIcon(capability.type || 'tool');
+                    const isAvailable = capability.isPurchased || capability.price?.amount === 0;
                     
                     return viewMode === 'grid' ? (
                       // Grid View Card
@@ -339,7 +355,7 @@ export default function ShowcaseModern({ initialCategory = 'all', onNavigate }: 
                         key={capability.id}
                         className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer group"
                         onClick={() => {
-                          const capabilityIndex = filteredCapabilities.findIndex(c => c.id === capability.id);
+                          const capabilityIndex = filteredCapabilities.findIndex(c => c?.id === capability.id);
                           setCurrentDetailIndex(capabilityIndex);
                           setViewMode('detail');
                         }}
@@ -442,7 +458,7 @@ export default function ShowcaseModern({ initialCategory = 'all', onNavigate }: 
                         key={capability.id}
                         className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer p-5"
                         onClick={() => {
-                          const capabilityIndex = filteredCapabilities.findIndex(c => c.id === capability.id);
+                          const capabilityIndex = filteredCapabilities.findIndex(c => c?.id === capability.id);
                           setCurrentDetailIndex(capabilityIndex);
                           setViewMode('detail');
                         }}

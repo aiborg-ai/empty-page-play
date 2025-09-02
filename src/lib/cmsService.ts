@@ -680,7 +680,7 @@ export class CMSService {
       if (fetchError) throw fetchError;
 
       // Create copy with new name
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       const { id: _id, created_at: _created_at, updated_at: _updated_at, ...dashboardData } = original;
       
       const { data, error } = await supabase

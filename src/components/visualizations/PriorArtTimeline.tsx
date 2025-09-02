@@ -17,7 +17,7 @@ const PriorArtTimeline: React.FC<PriorArtTimelineProps> = ({ data }) => {
     { year: 2024, patents: 35, keyPatent: 'US12345678', title: 'Latest Innovation' }
   ];
 
-  const maxPatents = Math.max(...timelineData.map(d => d.patents));
+  const maxPatents = Math.max(...timelineData.map((d: any) => d.patents));
   const currentYear = new Date().getFullYear();
 
   return (
@@ -26,7 +26,7 @@ const PriorArtTimeline: React.FC<PriorArtTimelineProps> = ({ data }) => {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-gray-50 rounded-lg p-3 text-center">
           <div className="text-2xl font-bold text-gray-900">
-            {timelineData.reduce((sum, d) => sum + d.patents, 0)}
+            {timelineData.reduce((sum: number, d: any) => sum + d.patents, 0)}
           </div>
           <div className="text-xs text-gray-600">Total Prior Art</div>
         </div>
@@ -68,7 +68,7 @@ const PriorArtTimeline: React.FC<PriorArtTimelineProps> = ({ data }) => {
 
           {/* Data bars */}
           <div className="absolute inset-0 flex items-end justify-between px-2">
-            {timelineData.map((item, index) => {
+            {timelineData.map((item: any, index: number) => {
               const height = (item.patents / maxPatents) * 100;
               const isCurrentYear = item.year === currentYear;
               const isHighGrowth = index > 0 && item.patents > timelineData[index - 1].patents;
@@ -109,7 +109,7 @@ const PriorArtTimeline: React.FC<PriorArtTimelineProps> = ({ data }) => {
 
           {/* X-axis labels */}
           <div className="absolute -bottom-6 left-0 right-0 flex justify-between px-2">
-            {timelineData.map(item => (
+            {timelineData.map((item: any) => (
               <div key={item.year} className="flex-1 text-center">
                 <span className="text-xs text-gray-600">{item.year}</span>
               </div>
@@ -125,7 +125,7 @@ const PriorArtTimeline: React.FC<PriorArtTimelineProps> = ({ data }) => {
           Key Prior Art References
         </h4>
         <div className="space-y-2 max-h-32 overflow-y-auto">
-          {timelineData.slice(-3).reverse().map(item => (
+          {timelineData.slice(-3).reverse().map((item: any) => (
             <div key={item.keyPatent} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
               <div className="flex items-center gap-2">
                 <Calendar className="w-3 h-3 text-gray-400" />

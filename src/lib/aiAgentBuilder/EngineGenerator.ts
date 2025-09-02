@@ -9,31 +9,32 @@ import {
 } from '@/types/aiAgentBuilder';
 
 export class EngineGenerator {
-  private config: BuilderConfiguration;
+  // private _config: BuilderConfiguration; // Unused - config passed but not used in generation
   private template: EngineTemplate;
 
-  constructor(template: EngineTemplate, config?: Partial<BuilderConfiguration>) {
+  constructor(template: EngineTemplate, _config?: Partial<BuilderConfiguration>) {
     this.template = template;
-    this.config = {
-      templateEngine: {
-        framework: 'react',
-        styling: 'tailwind',
-        stateManagement: 'context',
-        ...config?.templateEngine
-      },
-      aiIntegration: {
-        provider: 'openai',
-        model: 'gpt-4',
-        temperature: 0.7,
-        maxTokens: 2000,
-        ...config?.aiIntegration
-      },
-      deployment: {
-        target: 'vercel',
-        environment: 'development',
-        ...config?.deployment
-      }
-    };
+    // Configuration is accepted but not currently used in the generation process
+    // this._config = {
+    //   templateEngine: {
+    //     framework: 'react',
+    //     styling: 'tailwind',
+    //     stateManagement: 'context',
+    //     ...config?.templateEngine
+    //   },
+    //   aiIntegration: {
+    //     provider: 'openai',
+    //     model: 'gpt-4',
+    //     temperature: 0.7,
+    //     maxTokens: 2000,
+    //     ...config?.aiIntegration
+    //   },
+    //   deployment: {
+    //     target: 'vercel',
+    //     environment: 'development',
+    //     ...config?.deployment
+    //   }
+    // };
   }
 
   async generate(): Promise<GeneratedEngine> {
@@ -971,7 +972,7 @@ export class DataConnector {
     };
   }
 
-  private async generateTests(components: GeneratedComponent[]): Promise<GeneratedComponent> {
+  private async generateTests(_components: GeneratedComponent[]): Promise<GeneratedComponent> {
     const testCode = `
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';

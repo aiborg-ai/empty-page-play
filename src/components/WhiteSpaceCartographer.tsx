@@ -3,7 +3,7 @@
  * Explores unexplored technological territories and blue ocean opportunities
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Box, Sphere, Line } from '@react-three/drei';
 import * as THREE from 'three';
@@ -11,24 +11,18 @@ import {
   Map,
   Compass,
   Target,
-  TrendingUp,
   DollarSign,
   Clock,
   Users,
   Lightbulb,
-  Search,
-  Filter,
   Download,
   Navigation,
-  Eye,
-  RotateCcw,
   Layers,
-  HelpCircle
+  HelpCircle,
+  AlertTriangle
 } from 'lucide-react';
 import {
   InnovationWhiteSpace,
-  WhiteSpaceMap,
-  WhiteSpaceDimension,
   DiscoveryZone,
   NavigationWaypoint
 } from '../types/innovationIntelligence';
@@ -66,7 +60,7 @@ interface DiscoveryZoneVisualizationProps {
 }
 
 // Opportunity Zone 3D Component
-function OpportunityZone({ space, isSelected, viewMode, onClick }: OpportunityZoneProps) {
+function OpportunityZone({ space, isSelected, viewMode: _viewMode, onClick }: OpportunityZoneProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
 
@@ -211,9 +205,9 @@ function OpportunityZone({ space, isSelected, viewMode, onClick }: OpportunityZo
 
 // Navigation Path Component
 function NavigationPath({ waypoints, isAnimating }: NavigationPathProps) {
-  const lineRef = useRef<THREE.Line>(null);
+  const lineRef = useRef<any>(null);
 
-  useFrame((state, delta) => {
+  useFrame((state, _delta) => {
     if (lineRef.current && isAnimating) {
       // Animate path discovery
       const material = lineRef.current.material as THREE.LineBasicMaterial;
@@ -630,7 +624,19 @@ export default function WhiteSpaceCartographer({ onNavigate }: WhiteSpaceCartogr
         categories={categories}
         sortOptions={sortOptions}
         showVoiceSearch={true}
-        {...filterState}
+        searchQuery={filterState.searchQuery}
+        selectedCategory={filterState.selectedCategory}
+        selectedSort={filterState.selectedSort}
+        activeFilters={filterState.activeFilters}
+        isExpanded={filterState.isExpanded}
+        activeFilterCount={filterState.activeFilterCount}
+        setSearchQuery={filterState.setSearchQuery}
+        setSelectedCategory={filterState.setSelectedCategory}
+        setSelectedSort={filterState.setSelectedSort}
+        setActiveFilter={filterState.setActiveFilter}
+        toggleQuickFilter={filterState.toggleQuickFilter}
+        clearAllFilters={filterState.clearAllFilters}
+        setExpanded={filterState.setExpanded}
       />
 
       {/* Analysis Input */}

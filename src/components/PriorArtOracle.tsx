@@ -90,7 +90,7 @@ const PriorArtOracle: React.FC<PriorArtOracleProps> = ({
   });
   
   const [isSearching, setIsSearching] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const [_searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [activeResult, setActiveResult] = useState<SearchResult | null>(null);
   const [selectedReference, setSelectedReference] = useState<PriorArtReference | null>(null);

@@ -13,11 +13,11 @@ interface PatentabilityAssessmentEngineProps {
 
 const PatentabilityAssessmentEngine: React.FC<PatentabilityAssessmentEngineProps> = ({
   onComplete,
-  onClose
+  onClose: _onClose
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-  const [responses, setResponses] = useState<Record<number, any>>({});
+  const [responses, setResponses] = useState<Record<number | string, any>>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [recommendation, setRecommendation] = useState<any>(null);
   const [sessionId, setSessionId] = useState<string>('');
@@ -342,7 +342,7 @@ const PatentabilityAssessmentEngine: React.FC<PatentabilityAssessmentEngineProps
     
     try {
       // Save step response
-      const updatedResponses = { ...responses, [currentStep]: stepData };
+      const updatedResponses: Record<number | string, any> = { ...responses, [currentStep]: stepData };
       setResponses(updatedResponses);
       
       // Process with AI
@@ -355,13 +355,13 @@ const PatentabilityAssessmentEngine: React.FC<PatentabilityAssessmentEngineProps
       // Update visualization data based on step
       if (currentStep === 0) {
         // After invention analysis, set initial novelty score
-        updatedResponses.noveltyScore = 75 + Math.random() * 15; // Demo: 75-90
+        updatedResponses['noveltyScore'] = 75 + Math.random() * 15; // Demo: 75-90
       } else if (currentStep === 1) {
         // After prior art search, update with timeline data
-        updatedResponses.priorArtTimeline = result.priorArtTimeline;
+        updatedResponses['priorArtTimeline'] = (result as any).priorArtTimeline;
       } else if (currentStep === 2) {
         // After novelty assessment, add risk data
-        updatedResponses.risks = result.risks;
+        updatedResponses['risks'] = (result as any).risks;
       }
       
       setResponses(updatedResponses);

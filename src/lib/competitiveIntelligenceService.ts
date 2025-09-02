@@ -266,7 +266,7 @@ class CompetitiveIntelligenceServiceImpl implements CompetitiveIntelligenceServi
     }));
   }
 
-  private generateBusinessStrategies(industry: string): string[] {
+  private generateBusinessStrategies(_industry: string): string[] {
     const strategies = [
       'Market expansion into emerging markets',
       'Technology platform consolidation',
@@ -1001,13 +1001,13 @@ class CompetitiveIntelligenceServiceImpl implements CompetitiveIntelligenceServi
     };
   }
 
-  async generateLandscapeReport(landscapeId: string): Promise<any> {
+  async generateLandscapeReport(_landscapeId: string): Promise<any> {
     await this.simulateDelay(1500);
     // Implementation would generate comprehensive landscape report
     return { message: 'Landscape report generated successfully' };
   }
 
-  async generateBenchmarkingReport(competitors: string[]): Promise<any> {
+  async generateBenchmarkingReport(_competitors: string[]): Promise<any> {
     await this.simulateDelay(2000);
     // Implementation would generate benchmarking report
     return { message: 'Benchmarking report generated successfully' };
@@ -1102,7 +1102,7 @@ class CompetitiveIntelligenceServiceImpl implements CompetitiveIntelligenceServi
         citationImpact: 3.2,
         portfolioValue: 125000000
       },
-      competitorPortfolios: competitorIds.map((id, index) => ({
+      competitorPortfolios: competitorIds.map((_id, index) => ({
         competitor: `Competitor ${index + 1}`,
         metrics: {
           totalPatents: Math.floor(Math.random() * 2000) + 500,

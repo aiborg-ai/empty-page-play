@@ -142,6 +142,7 @@ export default function ReportsModern({ onNavigate }: ReportsModernProps) {
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'rating'>('recent');
   const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
   const [showFilters, setShowFilters] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
 
   const getColorClasses = (color: string) => {
     const colors = {
@@ -476,23 +477,32 @@ export default function ReportsModern({ onNavigate }: ReportsModernProps) {
         {/* Search and Filter Bar */}
         <SearchFilterBar
           placeholder="Search reports by name, type, or tags..."
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
           categories={[
             { value: 'all', label: 'All Reports', count: filteredReports.length },
-            { value: 'analytics', label: 'Analytics', count: reports.filter(r => r.category === 'analytics').length },
-            { value: 'competitive', label: 'Competitive Intelligence', count: reports.filter(r => r.category === 'competitive').length },
-            { value: 'patent', label: 'Patent Analysis', count: reports.filter(r => r.category === 'patent').length },
-            { value: 'market', label: 'Market Research', count: reports.filter(r => r.category === 'market').length }
+            { value: 'analytics', label: 'Analytics', count: reports.filter(r => r.type === 'analytics').length },
+            { value: 'competitive', label: 'Competitive Intelligence', count: reports.filter(r => r.type === 'competitive').length },
+            { value: 'patent', label: 'Patent Analysis', count: reports.filter(r => r.type === 'patent').length },
+            { value: 'market', label: 'Market Research', count: reports.filter(r => r.type === 'market').length }
           ]}
           selectedCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
+          setSelectedCategory={setActiveCategory}
           sortOptions={[
             { value: 'recent', label: 'Most Recent' },
             { value: 'name', label: 'Name (A-Z)' },
             { value: 'updated', label: 'Last Updated' },
             { value: 'popular', label: 'Most Popular' }
           ]}
+          selectedSort="recent"
+          setSelectedSort={() => {}}
+          activeFilters={{}}
+          setActiveFilter={() => {}}
+          toggleQuickFilter={() => {}}
+          clearAllFilters={() => {}}
+          setExpanded={() => {}}
+          isExpanded={false}
+          activeFilterCount={0}
           className="mb-6"
         />
 
